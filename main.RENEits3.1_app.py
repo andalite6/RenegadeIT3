@@ -1,11 +1,5 @@
-# ================================================================
-# RENEGADE SECURITY EXPERT - AI SECURITY & SUSTAINABILITY SUPER APP
-# ================================================================
-# "To catch a hacker, you need to think like one. But to outsmart them,
-# you need to be better than they ever dreamed of being." - RSE
-# ================================================================
-
 import streamlit as st
+import streamlit.components.v1 as components
 import pandas as pd
 import numpy as np
 import plotly.express as px
@@ -23,35 +17,33 @@ import traceback
 from datetime import datetime, timedelta
 from io import BytesIO
 
-# ----------------------------------------------------------------
-# CONFIGURATE THE WAR ROOM - No half measures, no weak signals
-# ----------------------------------------------------------------
+# Configure logging
 logging.basicConfig(
     level=logging.INFO,
-    format='%(asctime)s - [MAVERICK] %(levelname)s - %(message)s',
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
     handlers=[
-        logging.FileHandler("renegade_security.log"),
+        logging.FileHandler("super_app.log"),
         logging.StreamHandler()
     ]
 )
-logger = logging.getLogger("RenegadeSecurity")
+logger = logging.getLogger("SuperApp")
 
-# Set page configuration with attitude
+# Set page configuration with custom theme
 st.set_page_config(
-    page_title="Renegade Security Expert",
-    page_icon="⚔️",
+    page_title="AI Security & Sustainability Hub",
+    page_icon="🔮",
     layout="wide",
     initial_sidebar_state="expanded",
 )
 
 # ----------------------------------------------------------------
-# SESSION STATE - Where we track all the moves they think we don't see
+# Session State Management
 # ----------------------------------------------------------------
 
 def initialize_session_state():
-    """Set up the battleground. You can't catch what you can't track."""
+    """Initialize all session state variables with proper error handling"""
     try:
-        # Core intelligence assets
+        # Core session states
         if 'targets' not in st.session_state:
             st.session_state.targets = []
 
@@ -68,34 +60,34 @@ def initialize_session_state():
             st.session_state.vulnerabilities_found = 0
 
         if 'current_theme' not in st.session_state:
-            st.session_state.current_theme = "dark"  # We work best in the shadows
+            st.session_state.current_theme = "dark"  # Default to dark theme
             
         if 'current_page' not in st.session_state:
             st.session_state.current_page = "Dashboard"
             
-        # Thread management - like herding cats, but deadlier
+        # Thread management
         if 'active_threads' not in st.session_state:
             st.session_state.active_threads = []
             
-        # Error handling - because even mavericks make mistakes
+        # Error handling
         if 'error_message' not in st.session_state:
             st.session_state.error_message = None
             
-        # Initialize bias hunting tools
+        # Initialize bias testing state
         if 'bias_results' not in st.session_state:
             st.session_state.bias_results = {}
             
         if 'show_bias_results' not in st.session_state:
             st.session_state.show_bias_results = False
             
-        # Carbon tracking - because we fight dirty, not dirty planet
+        # Carbon tracking states
         if 'carbon_tracking_active' not in st.session_state:
             st.session_state.carbon_tracking_active = False
             
         if 'carbon_measurements' not in st.session_state:
             st.session_state.carbon_measurements = []
             
-        # Integration states - for when we need to bring in the cavalry
+        # HTML Components integration states
         if 'engine_room_initialized' not in st.session_state:
             st.session_state.engine_room_initialized = False
             
@@ -105,32 +97,32 @@ def initialize_session_state():
         if 'sustainability_integrated' not in st.session_state:
             st.session_state.sustainability_integrated = False
             
-        logger.info("Battlefield initialized. Let the games begin.")
+        logger.info("Session state initialized successfully")
     except Exception as e:
-        logger.error(f"Failed to set up the war room: {str(e)}")
-        display_error(f"System initialization failure. We've been compromised: {str(e)}")
+        logger.error(f"Error initializing session state: {str(e)}")
+        display_error(f"Failed to initialize application state: {str(e)}")
 
-# Thread cleanup - We don't leave soldiers behind
+# Thread cleanup
 def cleanup_threads():
-    """Clean up the mess. Leave no trace."""
+    """Remove completed threads from session state"""
     try:
         if 'active_threads' in st.session_state:
-            # Filter out the fallen soldiers
+            # Filter out completed threads
             active_threads = []
             for thread in st.session_state.active_threads:
                 if thread.is_alive():
                     active_threads.append(thread)
             
-            # Update our roster with only the ones still breathing
+            # Update session state with only active threads
             st.session_state.active_threads = active_threads
             
             if len(st.session_state.active_threads) > 0:
-                logger.info(f"Active operatives: {len(st.session_state.active_threads)}")
+                logger.info(f"Active threads: {len(st.session_state.active_threads)}")
     except Exception as e:
-        logger.error(f"Thread cleanup failed. We've got leaks: {str(e)}")
+        logger.error(f"Error cleaning up threads: {str(e)}")
 
 # ----------------------------------------------------------------
-# UI THEMES - Because even rebels have style
+# UI Theme & Styling
 # ----------------------------------------------------------------
 
 # Define color schemes
@@ -138,20 +130,20 @@ themes = {
     "dark": {
         "bg_color": "#121212",
         "card_bg": "#1E1E1E",
-        "primary": "#FF5722",    # Maverick orange
+        "primary": "#1DB954",    # Vibrant green
         "secondary": "#BB86FC",  # Purple
         "accent": "#03DAC6",     # Teal
-        "warning": "#FFC107",    # Amber
-        "error": "#F44336",      # Red
+        "warning": "#FF9800",    # Orange
+        "error": "#CF6679",      # Red
         "text": "#FFFFFF"
     },
     "light": {
         "bg_color": "#F5F5F5",
         "card_bg": "#FFFFFF",
-        "primary": "#FF5722",    # Maverick orange
+        "primary": "#1DB954",    # Vibrant green
         "secondary": "#7C4DFF",  # Deep purple
         "accent": "#00BCD4",     # Cyan
-        "warning": "#FFC107",    # Amber
+        "warning": "#FF9800",    # Orange
         "error": "#F44336",      # Red
         "text": "#212121"
     }
@@ -159,17 +151,17 @@ themes = {
 
 # Get current theme colors safely
 def get_theme():
-    """Get current theme. Style matters when you're hunting exploits."""
+    """Get current theme with error handling"""
     try:
         return themes[st.session_state.current_theme]
     except Exception as e:
-        logger.error(f"Theme retrieval failed. Using default: {str(e)}")
-        # Return dark theme as fallback - we work best in shadows
+        logger.error(f"Error getting theme: {str(e)}")
+        # Return dark theme as fallback
         return themes["dark"]
 
-# CSS styles - The warpaint of digital warriors
+# CSS styles
 def load_css():
-    """Load CSS. Look good while doing bad things to bad people."""
+    """Load CSS with the current theme"""
     try:
         theme = get_theme()
         
@@ -182,7 +174,6 @@ def load_css():
         
         h1, h2, h3, h4, h5, h6 {{
             color: {theme["primary"]};
-            font-weight: bold;
         }}
         
         .stProgress > div > div > div > div {{
@@ -287,11 +278,11 @@ def load_css():
         }}
         
         .nav-item:hover {{
-            background-color: rgba(255, 87, 34, 0.1);
+            background-color: rgba(29, 185, 84, 0.1);
         }}
         
         .nav-item.active {{
-            background-color: rgba(255, 87, 34, 0.2);
+            background-color: rgba(29, 185, 84, 0.2);
             font-weight: bold;
         }}
         
@@ -315,7 +306,7 @@ def load_css():
         }}
         
         .tag.fairness {{
-            background-color: rgba(255, 193, 7, 0.2);
+            background-color: rgba(255, 152, 0, 0.2);
             color: {theme["warning"]};
         }}
         
@@ -337,7 +328,7 @@ def load_css():
         }}
         
         .error-message {{
-            background-color: #F44336;
+            background-color: #CF6679;
             color: white;
             padding: 10px;
             border-radius: 5px;
@@ -419,85 +410,55 @@ def load_css():
             opacity: 0.7;
             margin: 0;
         }}
-        
-        /* Renegade special additions */
-        .renegade-quote {{
-            font-style: italic;
-            border-left: 3px solid {theme["primary"]};
-            padding-left: 10px;
-            margin: 15px 0;
-            opacity: 0.85;
-        }}
-        
-        .vulnerability-counter {{
-            background-color: {theme["primary"]};
-            color: white;
-            border-radius: 50%;
-            width: 30px;
-            height: 30px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: bold;
-            margin-right: 10px;
-        }}
-        
-        .hacker-alert {{
-            background-color: rgba(244, 67, 54, 0.1);
-            border-left: 3px solid {theme["error"]};
-            padding: 10px;
-            margin: 10px 0;
-            border-radius: 4px;
-        }}
         </style>
         """
     except Exception as e:
-        logger.error(f"CSS loading failed. Flying ugly: {str(e)}")
+        logger.error(f"Error loading CSS: {str(e)}")
         # Return minimal CSS as fallback
-        return "<style>.error-message { background-color: #F44336; color: white; padding: 10px; border-radius: 5px; margin-bottom: 20px; }</style>"
+        return "<style>.error-message { background-color: #CF6679; color: white; padding: 10px; border-radius: 5px; margin-bottom: 20px; }</style>"
 
 # ----------------------------------------------------------------
-# NAVIGATION - Shift like quicksilver between battlegrounds
+# Navigation and Control
 # ----------------------------------------------------------------
 
 # Helper function to set page
 def set_page(page_name):
-    """Navigate to new battleground. Always keep moving."""
+    """Set the current page safely"""
     try:
         st.session_state.current_page = page_name
-        logger.info(f"Maverick repositioning to: {page_name} zone")
+        logger.info(f"Navigation: Switched to {page_name} page")
     except Exception as e:
-        logger.error(f"Navigation failure to {page_name}: {str(e)}")
-        display_error(f"Failed to reach {page_name}. Route compromised.")
+        logger.error(f"Error setting page to {page_name}: {str(e)}")
+        display_error(f"Failed to navigate to {page_name}")
 
-# Safe rerun function - Because sometimes you gotta pull the trigger twice
+# Safe rerun function
 def safe_rerun():
-    """Reload the battlefield. Sometimes you gotta hit refresh."""
+    """Safely rerun the app, handling different Streamlit versions"""
     try:
         st.rerun()  # For newer Streamlit versions
     except Exception as e1:
         try:
             st.experimental_rerun()  # For older Streamlit versions
         except Exception as e2:
-            logger.error(f"Rerun failed: {str(e1)} then {str(e2)}")
-            # We're stuck. Keep your cool.
+            logger.error(f"Failed to rerun app: {str(e1)} then {str(e2)}")
+            # Do nothing - at this point we can't fix it
 
-# Error handling - When things break, break them better
+# Error handling
 def display_error(message):
-    """Display error message. Don't sugarcoat it."""
+    """Display error message to the user"""
     try:
         st.session_state.error_message = message
-        logger.error(f"BREACH DETECTED: {message}")
+        logger.error(f"UI Error: {message}")
     except Exception as e:
-        logger.critical(f"Critical failure in error display. We're flying blind: {str(e)}")
+        logger.critical(f"Failed to display error message: {str(e)}")
 
 # ----------------------------------------------------------------
-# CUSTOM UI COMPONENTS - Our special weapons
+# Custom UI Components
 # ----------------------------------------------------------------
 
 # Custom components
 def card(title, content, card_type="default"):
-    """Generate HTML card. Data needs packaging."""
+    """Generate HTML card with error handling"""
     try:
         card_class = "card"
         if card_type == "warning":
@@ -514,16 +475,16 @@ def card(title, content, card_type="default"):
         </div>
         """
     except Exception as e:
-        logger.error(f"Card rendering fail: {str(e)}")
+        logger.error(f"Error rendering card: {str(e)}")
         return f"""
         <div class="card error-card">
-            <div class="card-title">Card Failure</div>
-            <p>Card crashed and burned: {str(e)}</p>
+            <div class="card-title">Error Rendering Card</div>
+            <p>Failed to render card content: {str(e)}</p>
         </div>
         """
 
 def modern_card(title, content, card_type="default", icon=None):
-    """Generate a modern card. Style with substance."""
+    """Generate a modern style card with optional icon"""
     try:
         card_class = "modern-card"
         if card_type == "warning":
@@ -547,16 +508,16 @@ def modern_card(title, content, card_type="default", icon=None):
         </div>
         """
     except Exception as e:
-        logger.error(f"Modern card malfunction: {str(e)}")
+        logger.error(f"Error rendering modern card: {str(e)}")
         return f"""
         <div class="modern-card error">
-            <div class="card-title">Card Failure</div>
-            <p>Card self-destructed: {str(e)}</p>
+            <div class="card-title">Error Rendering Card</div>
+            <p>Failed to render card content: {str(e)}</p>
         </div>
         """
 
 def metric_card(label, value, description="", prefix="", suffix=""):
-    """Generate metric card. Numbers don't lie, people do."""
+    """Generate HTML metric card with error handling"""
     try:
         return f"""
         <div class="modern-card hover-card">
@@ -566,80 +527,64 @@ def metric_card(label, value, description="", prefix="", suffix=""):
         </div>
         """
     except Exception as e:
-        logger.error(f"Metric card crash: {str(e)}")
+        logger.error(f"Error rendering metric card: {str(e)}")
         return f"""
         <div class="modern-card error">
             <div class="metric-label">Error</div>
             <div class="metric-value">N/A</div>
-            <div style="font-size: 14px; opacity: 0.7;">Metric malfunction: {str(e)}</div>
+            <div style="font-size: 14px; opacity: 0.7;">Failed to render metric: {str(e)}</div>
         </div>
         """
-
-# Maverick quotes - Inspiration for the hunt
-maverick_quotes = [
-    "To catch a hacker, you need to think like one. But to outsmart them, you need to be better than they ever dreamed of being.",
-    "Systems aren't broken by accidents. They're broken by people who spent more time thinking about them than their creators did.",
-    "Security isn't about building walls. It's about knowing exactly where they'll try to climb over and waiting for them there.",
-    "The best traps aren't the ones that stop attacks. They're the ones that make attackers reveal themselves.",
-    "I don't play by the rulebook because the people I'm hunting burned theirs a long time ago.",
-    "If you understand the exploits better than the exploiters, you've already won half the battle.",
-    "Predictable security is already broken. Be the chaos they don't expect.",
-    "You don't catch breaches with compliance checklists. You catch them by thinking three steps ahead of someone thinking two steps ahead of you.",
-    "The best security isn't about stopping every attack. It's about making sure the ones that succeed tell you everything you need to know.",
-    "If you want to protect a system, first figure out every possible way to break it."
-]
 
 # Logo and header
 def render_header():
-    """Render the header. First impressions matter."""
+    """Render the application header safely"""
     try:
-        quote = random.choice(maverick_quotes)
-        logo_html = f"""
+        logo_html = """
         <div class="app-header">
-            <div style="margin-right: 15px; font-size: 2.5rem;">⚔️</div>
+            <div style="margin-right: 15px; font-size: 2.5rem;">🔮</div>
             <div>
-                <div class="app-title">Renegade Security Expert</div>
-                <div class="app-subtitle">Breaking systems to save them. Finding flaws before they become failures.</div>
+                <div class="app-title">AI Security & Sustainability Hub</div>
+                <div class="app-subtitle">Comprehensive Security, Ethics & Environmental Analysis</div>
             </div>
         </div>
-        <div class="renegade-quote">{quote}</div>
         """
         st.markdown(logo_html, unsafe_allow_html=True)
     except Exception as e:
-        logger.error(f"Header rendering failed: {str(e)}")
-        st.markdown("# ⚔️ Renegade Security Expert")
+        logger.error(f"Error rendering header: {str(e)}")
+        st.markdown("# 🔮 AI Security & Sustainability Hub")
 
 # ----------------------------------------------------------------
-# SIDEBAR NAVIGATION - Command & Control Center
+# Sidebar Navigation
 # ----------------------------------------------------------------
 
 def sidebar_navigation():
-    """Render the sidebar navigation. Your mission control center."""
+    """Render the sidebar navigation with organized categories"""
     try:
-        st.sidebar.markdown('<div class="sidebar-title">Renegade Security Expert</div>', unsafe_allow_html=True)
+        st.sidebar.markdown('<div class="sidebar-title">AI Security & Sustainability Hub</div>', unsafe_allow_html=True)
         
         # Organize navigation options by category
         navigation_categories = {
-            "Hunt & Capture": [
-                {"icon": "🎯", "name": "Dashboard"},
-                {"icon": "📡", "name": "Target Management"},
+            "Core Security": [
+                {"icon": "🏠", "name": "Dashboard"},
+                {"icon": "🎯", "name": "Target Management"},
                 {"icon": "🧪", "name": "Test Configuration"},
-                {"icon": "⚡", "name": "Run Assessment"},
+                {"icon": "▶️", "name": "Run Assessment"},
                 {"icon": "📊", "name": "Results Analyzer"}
             ],
-            "Ethics Arsenal": [
+            "AI Ethics & Bias": [
                 {"icon": "🔍", "name": "Ethical AI Testing"},
                 {"icon": "⚖️", "name": "Bias Testing"},
                 {"icon": "📏", "name": "Bias Comparison"},
                 {"icon": "🔬", "name": "Bias Labs Integration"},
                 {"icon": "🧠", "name": "HELM Evaluation"}
             ],
-            "Green Operations": [
+            "Sustainability": [
                 {"icon": "🌱", "name": "Environmental Impact"},
                 {"icon": "🌍", "name": "Sustainability Dashboard"},
                 {"icon": "♻️", "name": "Sustainability Integration"}
             ],
-            "Special Weapons": [
+            "Integration & Tools": [
                 {"icon": "📁", "name": "Multi-Format Import"},
                 {"icon": "🚀", "name": "High-Volume Testing"},
                 {"icon": "🔌", "name": "Engine Room Integration"},
@@ -648,7 +593,7 @@ def sidebar_navigation():
                 {"icon": "🏛️", "name": "AI Safety Standards"},
                 {"icon": "📊", "name": "Model Evaluation"}
             ],
-            "Command Center": [
+            "System": [
                 {"icon": "⚙️", "name": "Settings"}
             ]
         }
@@ -668,52 +613,52 @@ def sidebar_navigation():
                     set_page(option["name"])
                     safe_rerun()
         
-        # Theme toggle - darkness is our ally, but sometimes we work in the light
+        # Theme toggle
         st.sidebar.markdown("---")
-        st.sidebar.markdown('<div class="sidebar-title">🎭 Battle Mode</div>', unsafe_allow_html=True)
-        if st.sidebar.button("🔄 Toggle Light/Dark", key="toggle_theme", use_container_width=True):
+        st.sidebar.markdown('<div class="sidebar-title">🎨 Appearance</div>', unsafe_allow_html=True)
+        if st.sidebar.button("🔄 Toggle Theme", key="toggle_theme", use_container_width=True):
             st.session_state.current_theme = "light" if st.session_state.current_theme == "dark" else "dark"
-            logger.info(f"Shifting to {st.session_state.current_theme} operations")
+            logger.info(f"Theme toggled to {st.session_state.current_theme}")
             safe_rerun()
         
-        # System status - Know your battlefield
+        # System status
         st.sidebar.markdown("---")
-        st.sidebar.markdown('<div class="sidebar-title">📡 Battle Status</div>', unsafe_allow_html=True)
+        st.sidebar.markdown('<div class="sidebar-title">📡 System Status</div>', unsafe_allow_html=True)
         
         if st.session_state.running_test:
-            st.sidebar.success("⚡ Hunt in Progress")
+            st.sidebar.success("⚡ Test Running")
         else:
-            st.sidebar.info("⏸️ Awaiting Orders")
+            st.sidebar.info("⏸️ Idle")
         
         st.sidebar.markdown(f"🎯 Targets: {len(st.session_state.targets)}")
         
-        # Active threads info - Our operatives in the field
+        # Active threads info
         if len(st.session_state.active_threads) > 0:
-            st.sidebar.markdown(f"🧵 Active operatives: {len(st.session_state.active_threads)}")
+            st.sidebar.markdown(f"🧵 Active threads: {len(st.session_state.active_threads)}")
         
         # Add carbon tracking status if active
         if st.session_state.get("carbon_tracking_active", False):
-            st.sidebar.markdown("🌱 Carbon tracking active - We fight clean")
+            st.sidebar.markdown("🌱 Carbon tracking active")
         
         # Add Engine Room status if active
         if st.session_state.get("engine_room_initialized", False):
-            st.sidebar.markdown("🔌 Engine Room connected - Full throttle")
+            st.sidebar.markdown("🔌 Engine Room connected")
         
         # Add version info
         st.sidebar.markdown("---")
-        st.sidebar.markdown(f"v1.0.0 | Maverick Edition | {datetime.now().strftime('%Y-%m-%d')}", unsafe_allow_html=True)
+        st.sidebar.markdown(f"v1.0.0 | {datetime.now().strftime('%Y-%m-%d')}", unsafe_allow_html=True)
     except Exception as e:
-        logger.error(f"Sidebar navigation failure: {str(e)}")
-        st.sidebar.error("Navigation Compromised")
+        logger.error(f"Error rendering sidebar: {str(e)}")
+        st.sidebar.error("Navigation Error")
         st.sidebar.markdown(f"Error: {str(e)}")
 
 # ----------------------------------------------------------------
-# UTILITY CLASSES AND FUNCTIONS - Our tradecraft
+# Utility Classes and Functions (Common)
 # ----------------------------------------------------------------
 
 # Mock data functions with error handling
 def get_mock_test_vectors():
-    """Get test vectors. Know your weapons."""
+    """Get mock test vector data with error handling"""
     try:
         return [
             {
@@ -772,19 +717,19 @@ def get_mock_test_vectors():
             }
         ]
     except Exception as e:
-        logger.error(f"Test vector retrieval failed: {str(e)}")
-        display_error("Failed to load test vectors. Weapons unavailable.")
+        logger.error(f"Error getting mock test vectors: {str(e)}")
+        display_error("Failed to load test vectors")
         return []  # Return empty list as fallback
 
 def run_mock_test(target, test_vectors, duration=30):
-    """Run tests against targets. Hunt them down."""
+    """Simulate running a test in the background with proper error handling"""
     try:
         # Initialize progress
         st.session_state.progress = 0
         st.session_state.vulnerabilities_found = 0
         st.session_state.running_test = True
         
-        logger.info(f"Starting hunt against {target['name']} with {len(test_vectors)} attack vectors")
+        logger.info(f"Starting mock test against {target['name']} with {len(test_vectors)} test vectors")
         
         # Create mock results data structure
         results = {
@@ -797,14 +742,14 @@ def run_mock_test(target, test_vectors, duration=30):
             "test_details": {}
         }
         
-        # Simulate test execution - The hunt is on
+        # Simulate test execution
         total_steps = 100
         step_sleep = duration / total_steps
         
         for i in range(total_steps):
             # Check if we should stop (for handling cancellations)
             if not st.session_state.running_test:
-                logger.info("Hunt aborted by command")
+                logger.info("Test was cancelled")
                 break
                 
             time.sleep(step_sleep)
@@ -818,11 +763,11 @@ def run_mock_test(target, test_vectors, duration=30):
                 
                 # Add vulnerability to results
                 vulnerability = {
-                    "id": f"BREACH-{len(results['vulnerabilities']) + 1}",
+                    "id": f"VULN-{len(results['vulnerabilities']) + 1}",
                     "test_vector": vector["id"],
                     "test_name": vector["name"],
                     "severity": vector["severity"],
-                    "details": f"Vulnerability detected in {target['name']} using {vector['name']} attack vector. This could be exploited by malicious actors.",
+                    "details": f"Mock vulnerability found in {target['name']} using {vector['name']} test vector.",
                     "timestamp": datetime.now().isoformat()
                 }
                 results["vulnerabilities"].append(vulnerability)
@@ -832,14 +777,14 @@ def run_mock_test(target, test_vectors, duration=30):
                 results["summary"]["vulnerabilities_found"] += 1
                 results["summary"]["risk_score"] += weight
                 
-                logger.info(f"Target compromised: {vulnerability['id']} ({vulnerability['severity']})")
+                logger.info(f"Found vulnerability: {vulnerability['id']} ({vulnerability['severity']})")
         
         # Complete the test results
         results["summary"]["total_tests"] = len(test_vectors) * 10  # Assume 10 variations per vector
         results["timestamp"] = datetime.now().isoformat()
         results["target"] = target["name"]
         
-        logger.info(f"Hunt completed: {results['summary']['vulnerabilities_found']} vulnerabilities captured")
+        logger.info(f"Test completed: {results['summary']['vulnerabilities_found']} vulnerabilities found")
         
         # Set the results in session state
         st.session_state.test_results = results
@@ -852,7 +797,7 @@ def run_mock_test(target, test_vectors, duration=30):
             "traceback": traceback.format_exc(),
             "timestamp": datetime.now().isoformat()
         }
-        logger.error(f"Hunt operation failed: {str(e)}")
+        logger.error(f"Error in test execution: {str(e)}")
         logger.debug(traceback.format_exc())
         
         # Create error result
@@ -863,9 +808,9 @@ def run_mock_test(target, test_vectors, duration=30):
         # Always ensure we reset the running state
         st.session_state.running_test = False
 
-# File Format Support Functions - Intel comes in many forms
+# File Format Support Functions
 def handle_multiple_file_formats(uploaded_file):
-    """Process different file formats. Intelligence comes in many forms."""
+    """Process different file formats for impact assessments"""
     try:
         file_extension = uploaded_file.name.split('.')[-1].lower()
         
@@ -930,37 +875,36 @@ def handle_multiple_file_formats(uploaded_file):
         
         # Other formats are supported similarly...
         else:
-            return {"error": f"Unsupported file format: {file_extension}. Even mavericks have limits."}
+            return {"error": f"Unsupported file format: {file_extension}"}
             
     except Exception as e:
-        logger.error(f"File processing failed: {str(e)}")
-        return {"error": f"Failed to process file: {str(e)}. We've been compromised."}
+        logger.error(f"Error processing file: {str(e)}")
+        return {"error": f"Failed to process file: {str(e)}"}
 
 # ----------------------------------------------------------------
-# MAIN CLASS FOR BIAS TESTING - Finding flaws in the foundation
+# Main Class for WhyLabs Bias Testing
 # ----------------------------------------------------------------
 
-class BiasHunter:
-    """Hunt for bias in AI systems. Because some flaws are invisible."""
+class WhyLabsBiasTest:
+    """Class for WhyLabs-based bias testing functionality"""
     
     def __init__(self):
         # This would normally import whylogs, but for demonstration we'll create a mock
         self.session = None
         self.results = {}
-        logger.info("BiasHunter deployed and ready")
     
     def initialize_session(self, dataset_name):
-        """Initialize a profiling session. Set up the trap."""
+        """Initialize a WhyLogs profiling session"""
         try:
             self.session = True  # Mock initialization
-            logger.info(f"Bias profiling initialized for {dataset_name}")
+            logger.info(f"WhyLogs session initialized for {dataset_name}")
             return True
         except Exception as e:
-            logger.error(f"Bias profiling setup failed: {str(e)}")
+            logger.error(f"Failed to initialize WhyLogs session: {str(e)}")
             return False
     
     def profile_dataset(self, df, dataset_name):
-        """Profile a dataset. Know your target."""
+        """Profile a dataset for bias analysis"""
         try:
             if self.session is None:
                 self.initialize_session(dataset_name)
@@ -968,14 +912,14 @@ class BiasHunter:
             # Create a mock profile
             profile = {"name": dataset_name, "columns": list(df.columns)}
             self.results[dataset_name] = {"profile": profile}
-            logger.info(f"Dataset {dataset_name} profile complete. We have its fingerprints.")
+            logger.info(f"Dataset {dataset_name} profiled successfully")
             return profile
         except Exception as e:
-            logger.error(f"Dataset profiling failed: {str(e)}")
+            logger.error(f"Failed to profile dataset: {str(e)}")
             return None
     
     def analyze_bias(self, df, protected_features, target_column, dataset_name):
-        """Analyze bias in a dataset. Find the weaknesses."""
+        """Analyze bias in a dataset based on protected features"""
         try:
             # Profile the dataset first
             profile = self.profile_dataset(df, dataset_name)
@@ -1008,24 +952,24 @@ class BiasHunter:
                 }
             
             self.results[dataset_name]["bias_metrics"] = bias_metrics
-            logger.info(f"Bias analysis complete for {dataset_name}. Found {len(bias_metrics)} potential exploits.")
+            logger.info(f"Bias analysis completed for {dataset_name}")
             return bias_metrics
         except Exception as e:
-            logger.error(f"Bias analysis operation failed: {str(e)}")
+            logger.error(f"Failed to analyze bias: {str(e)}")
             return {"error": str(e)}
     
     def get_results(self, dataset_name=None):
-        """Get analysis results. Review the intel."""
+        """Get analysis results"""
         if dataset_name:
             return self.results.get(dataset_name, {})
         return self.results
 
 # ----------------------------------------------------------------
-# MAIN CLASS FOR CARBON TRACKING - Fighting clean 
+# Main Class for Carbon Impact Tracking
 # ----------------------------------------------------------------
 
-class CarbonTracker:
-    """Track carbon impact. Because we fight dirty, not dirty planet."""
+class CarbonImpactTracker:
+    """Class for tracking environmental impact of AI systems"""
     
     def __init__(self):
         # Placeholder for codecarbon import
@@ -1033,34 +977,33 @@ class CarbonTracker:
         self.measurements = []
         self.total_emissions = 0.0
         self.is_tracking = False
-        logger.info("CarbonTracker deployed. Green ops ready.")
     
     def initialize_tracker(self, project_name, api_endpoint=None):
-        """Initialize the carbon tracker. Prep the sensors."""
+        """Initialize the carbon tracker"""
         try:
             # Mock initialization for demonstration
             self.tracker = {"project_name": project_name, "initialized": True}
-            logger.info(f"Carbon tracker calibrated for {project_name}")
+            logger.info(f"Carbon tracker initialized for {project_name}")
             return True
         except Exception as e:
-            logger.error(f"Carbon tracker initialization failed: {str(e)}")
+            logger.error(f"Failed to initialize carbon tracker: {str(e)}")
             return False
     
     def start_tracking(self):
-        """Start tracking carbon emissions. Begin surveillance."""
+        """Start tracking carbon emissions"""
         try:
             if self.tracker is None:
                 return False
                 
             self.is_tracking = True
-            logger.info("Carbon surveillance initiated")
+            logger.info("Carbon emission tracking started")
             return True
         except Exception as e:
-            logger.error(f"Carbon tracking failed to start: {str(e)}")
+            logger.error(f"Failed to start carbon tracking: {str(e)}")
             return False
     
     def stop_tracking(self):
-        """Stop tracking and get the emissions data. Review the evidence."""
+        """Stop tracking and get the emissions data"""
         try:
             if not self.is_tracking or self.tracker is None:
                 return 0.0
@@ -1071,22 +1014,22 @@ class CarbonTracker:
             self.measurements.append(emissions)
             self.total_emissions += emissions
             
-            logger.info(f"Carbon tracking complete. Measured: {emissions} kg CO2eq")
+            logger.info(f"Carbon emission tracking stopped. Measured: {emissions} kg CO2eq")
             return emissions
         except Exception as e:
-            logger.error(f"Carbon tracking termination failed: {str(e)}")
+            logger.error(f"Failed to stop carbon tracking: {str(e)}")
             return 0.0
     
     def get_total_emissions(self):
-        """Get total emissions tracked so far. Tally the damage."""
+        """Get total emissions tracked so far"""
         return self.total_emissions
     
     def get_all_measurements(self):
-        """Get all measurements. Review the evidence timeline."""
+        """Get all measurements"""
         return self.measurements
     
     def generate_report(self):
-        """Generate a report of carbon emissions. Compile the intelligence."""
+        """Generate a report of carbon emissions"""
         try:
             energy_solutions = [
                 {
@@ -1123,22 +1066,22 @@ class CarbonTracker:
                 "mitigation_strategies": energy_solutions
             }
         except Exception as e:
-            logger.error(f"Report generation failed: {str(e)}")
+            logger.error(f"Failed to generate emissions report: {str(e)}")
             return {"error": str(e)}
 
 # ----------------------------------------------------------------
-# PAGE RENDERERS - CORE SECURITY PAGES 
+# Page Renderers - Core Security Pages
 # ----------------------------------------------------------------
 
 def render_dashboard():
-    """Render the dashboard page. Command central."""
+    """Render the dashboard page safely"""
     try:
         render_header()
         
         st.markdown("""
         <div style="margin-bottom: 20px;">
-        Welcome to your command center, Maverick. This dashboard gives you real-time intel on security posture,
-        sustainability metrics, and ethical AI evaluation status. Know your battlefield.
+        Welcome to your AI Security & Sustainability Hub. This dashboard provides an overview of your security posture,
+        sustainability metrics, and ethical AI evaluation results.
         </div>
         """, unsafe_allow_html=True)
         
@@ -1146,27 +1089,27 @@ def render_dashboard():
         col1, col2, col3, col4 = st.columns(4)
         
         with col1:
-            st.markdown(metric_card("Targets", len(st.session_state.targets), "Identified AI systems"), unsafe_allow_html=True)
+            st.markdown(metric_card("Targets", len(st.session_state.targets), "Configured AI models"), unsafe_allow_html=True)
         
         with col2:
-            st.markdown(metric_card("Attack Vectors", "9", "Available exploit paths"), unsafe_allow_html=True)
+            st.markdown(metric_card("Test Vectors", "9", "Available security tests"), unsafe_allow_html=True)
         
         with col3:
             vuln_count = len(st.session_state.test_results.get("vulnerabilities", [])) if st.session_state.test_results else 0
-            st.markdown(metric_card("Vulnerabilities", vuln_count, "Captured weak points"), unsafe_allow_html=True)
+            st.markdown(metric_card("Vulnerabilities", vuln_count, "Identified issues"), unsafe_allow_html=True)
         
         with col4:
             risk_score = st.session_state.test_results.get("summary", {}).get("risk_score", 0) if st.session_state.test_results else 0
-            st.markdown(metric_card("Risk Score", risk_score, "Threat magnitude"), unsafe_allow_html=True)
+            st.markdown(metric_card("Risk Score", risk_score, "Overall security risk"), unsafe_allow_html=True)
         
         # Recent activity and status
         col1, col2 = st.columns([2, 1])
         
         with col1:
-            st.markdown(modern_card("Recent Activity", "Latest exploits and intel.", "default", "🔔"), unsafe_allow_html=True)
+            st.markdown(modern_card("Recent Activity", "Your latest security findings and events.", "default", "🔔"), unsafe_allow_html=True)
             
             if not st.session_state.test_results:
-                st.markdown(modern_card("No Recent Activity", "Run your first assessment to generate intel.", "warning", "⚠️"), unsafe_allow_html=True)
+                st.markdown(modern_card("No Recent Activity", "Run your first assessment to generate results.", "warning", "⚠️"), unsafe_allow_html=True)
             else:
                 # Show the most recent vulnerabilities
                 vulnerabilities = st.session_state.test_results.get("vulnerabilities", [])
@@ -1182,25 +1125,21 @@ def render_dashboard():
                         st.markdown(f"""
                         <div class="modern-card hover-card">
                             <div style="display: flex; justify-content: space-between; align-items: center;">
-                                <div style="display: flex; align-items: center;">
-                                    <div class="vulnerability-counter">#{vuln["id"].split('-')[1]}</div>
-                                    <div class="card-title">{vuln["test_name"]}</div>
-                                </div>
+                                <div class="card-title">{vuln["id"]}: {vuln["test_name"]}</div>
                                 <div style="color: {severity_color}; font-weight: bold; text-transform: uppercase; font-size: 12px;">
                                     {vuln["severity"]}
                                 </div>
                             </div>
                             <p>{vuln["details"]}</p>
-                            <div class="hacker-alert">If exploited, this vulnerability could allow attackers to gain unauthorized access or manipulate system outputs.</div>
-                            <div style="font-size: 12px; opacity: 0.7;">Captured: {vuln["timestamp"]}</div>
+                            <div style="font-size: 12px; opacity: 0.7;">Found in: {vuln["timestamp"]}</div>
                         </div>
                         """, unsafe_allow_html=True)
         
         with col2:
-            st.markdown(modern_card("Battle Status", "Current operational status", "default", "📡"), unsafe_allow_html=True)
+            st.markdown(modern_card("System Status", "Current operational status", "default", "📡"), unsafe_allow_html=True)
             
             if st.session_state.running_test:
-                st.markdown(modern_card("Hunt in Progress", f"""
+                st.markdown(modern_card("Test in Progress", f"""
                 <div style="margin-bottom: 10px;">
                     <div style="margin-bottom: 5px;">Progress:</div>
                     <div style="height: 10px; background-color: rgba(255,255,255,0.1); border-radius: 5px;">
@@ -1208,11 +1147,11 @@ def render_dashboard():
                     </div>
                     <div style="text-align: right; font-size: 12px; margin-top: 5px;">{int(st.session_state.progress*100)}%</div>
                 </div>
-                <div>Vulnerabilities captured: {st.session_state.vulnerabilities_found}</div>
+                <div>Vulnerabilities found: {st.session_state.vulnerabilities_found}</div>
                 """, "warning", "⚠️"), unsafe_allow_html=True)
             else:
-                st.markdown(modern_card("Systems Ready", """
-                <p>All systems operational and ready for the hunt.</p>
+                st.markdown(modern_card("System Ready", """
+                <p>All systems operational and ready to run assessments.</p>
                 <div style="display: flex; align-items: center;">
                     <div style="width: 10px; height: 10px; background-color: #4CAF50; border-radius: 50%; margin-right: 5px;"></div>
                     <div>API Connection: Active</div>
@@ -1220,7 +1159,7 @@ def render_dashboard():
                 """, "default", "✅"), unsafe_allow_html=True)
         
         # Test vector overview
-        st.markdown("<h3>Attack Vector Analysis</h3>", unsafe_allow_html=True)
+        st.markdown("<h3>Test Vector Overview</h3>", unsafe_allow_html=True)
         
         # Create a radar chart for test coverage
         try:
@@ -1237,9 +1176,9 @@ def render_dashboard():
             
             primary_color = get_theme()["primary"]
             # Convert hex to rgb for plotly
-            r_value = int(primary_color[1:3], 16) if len(primary_color) >= 7 else 255
-            g_value = int(primary_color[3:5], 16) if len(primary_color) >= 7 else 87
-            b_value = int(primary_color[5:7], 16) if len(primary_color) >= 7 else 34
+            r_value = int(primary_color[1:3], 16) if len(primary_color) >= 7 else 29
+            g_value = int(primary_color[3:5], 16) if len(primary_color) >= 7 else 185
+            b_value = int(primary_color[5:7], 16) if len(primary_color) >= 7 else 84
             
             fig.add_trace(go.Scatterpolar(
                 r=list(category_counts.values()),
@@ -1247,7 +1186,7 @@ def render_dashboard():
                 fill='toself',
                 fillcolor=f'rgba({r_value}, {g_value}, {b_value}, 0.3)',
                 line=dict(color=primary_color),
-                name='Attack Coverage'
+                name='Test Coverage'
             ))
             
             fig.update_layout(
@@ -1267,8 +1206,8 @@ def render_dashboard():
             
             st.plotly_chart(fig, use_container_width=True)
         except Exception as e:
-            logger.error(f"Radar chart rendering failed: {str(e)}")
-            st.error("Failed to render attack vector analysis")
+            logger.error(f"Error rendering radar chart: {str(e)}")
+            st.error("Failed to render radar chart")
         
         # Environmental impact summary
         st.markdown("<h3>Environmental Impact Summary</h3>", unsafe_allow_html=True)
@@ -1314,18 +1253,21 @@ def render_dashboard():
                 safe_rerun()
                 
     except Exception as e:
-        logger.error(f"Dashboard rendering failed: {str(e)}")
+        logger.error(f"Error rendering dashboard: {str(e)}")
         logger.debug(traceback.format_exc())
-        st.error(f"Dashboard compromised: {str(e)}")
+        st.error(f"Error rendering dashboard: {str(e)}")
+
+# Other core security page renderers are implemented similarly to render_dashboard()
+# For brevity, I'll include simplified versions of the remaining page functions
 
 def render_target_management():
-    """Render the target management page. Know your prey."""
+    """Render the target management page safely"""
     try:
         render_header()
         
         st.markdown("""
         <h2>Target Management</h2>
-        <p>Add and configure AI systems to hunt. Choose your targets wisely.</p>
+        <p>Add and configure AI models to test</p>
         """, unsafe_allow_html=True)
         
         # Show existing targets
@@ -1338,17 +1280,9 @@ def render_target_management():
                 col = cols[i % 3]
                 with col:
                     with st.container():
-                        st.markdown(f"### 🎯 {target['name']}")
+                        st.markdown(f"### {target['name']}")
                         st.markdown(f"**Endpoint:** {target['endpoint']}")
                         st.markdown(f"**Type:** {target.get('type', 'Unknown')}")
-                        
-                        # Target security assessment - quick summary
-                        if random.random() < 0.7:  # 70% chance to show a vulnerability hint
-                            st.markdown(f"""
-                            <div class="hacker-alert">
-                            Preliminary scan shows potential vulnerabilities in {random.choice(['authentication', 'output filtering', 'input validation', 'prompt handling', 'API security'])}.
-                            </div>
-                            """, unsafe_allow_html=True)
                         
                         col1, col2 = st.columns(2)
                         with col1:
@@ -1360,30 +1294,30 @@ def render_target_management():
                             if st.button("🗑️ Delete", key=f"delete_target_{i}", use_container_width=True):
                                 # Remove the target
                                 st.session_state.targets.pop(i)
-                                st.success(f"Target '{target['name']}' eliminated from database")
+                                st.success(f"Target '{target['name']}' deleted")
                                 safe_rerun()
         
         # Add new target form
-        st.markdown("<h3>Acquire New Target</h3>", unsafe_allow_html=True)
+        st.markdown("<h3>Add New Target</h3>", unsafe_allow_html=True)
         
         with st.form("add_target_form"):
             col1, col2 = st.columns(2)
             
             with col1:
-                target_name = st.text_input("Target Name (Codename)")
+                target_name = st.text_input("Target Name")
                 target_endpoint = st.text_input("API Endpoint URL")
                 target_type = st.selectbox("Model Type", ["LLM", "Content Filter", "Embedding", "Classification", "Other"])
             
             with col2:
-                api_key = st.text_input("API Key (Access Token)", type="password")
-                target_description = st.text_area("Mission Intel")
+                api_key = st.text_input("API Key", type="password")
+                target_description = st.text_area("Description")
             
             submit_button = st.form_submit_button("Add Target")
             
             if submit_button:
                 try:
                     if not target_name or not target_endpoint:
-                        st.error("Target name and endpoint are required for acquisition")
+                        st.error("Name and endpoint are required")
                     else:
                         new_target = {
                             "name": target_name,
@@ -1393,26 +1327,26 @@ def render_target_management():
                             "description": target_description
                         }
                         st.session_state.targets.append(new_target)
-                        st.success(f"Target '{target_name}' acquired successfully!")
-                        logger.info(f"New target acquired: {target_name}")
+                        st.success(f"Target '{target_name}' added successfully!")
+                        logger.info(f"Added new target: {target_name}")
                         safe_rerun()
                 except Exception as e:
-                    logger.error(f"Target acquisition failed: {str(e)}")
+                    logger.error(f"Error adding target: {str(e)}")
                     st.error(f"Failed to add target: {str(e)}")
     
     except Exception as e:
-        logger.error(f"Target management rendering failed: {str(e)}")
+        logger.error(f"Error rendering target management: {str(e)}")
         logger.debug(traceback.format_exc())
-        st.error(f"Target management compromised: {str(e)}")
+        st.error(f"Error in target management: {str(e)}")
 
 def render_test_configuration():
-    """Render the test configuration page. Plan your attack."""
+    """Render the test configuration page safely"""
     try:
         render_header()
         
         st.markdown("""
-        <h2>Attack Vector Configuration</h2>
-        <p>Configure your arsenal for the hunt. The right tools for the right job.</p>
+        <h2>Test Configuration</h2>
+        <p>Customize your security assessment</p>
         """, unsafe_allow_html=True)
         
         # Implementing just enough to show the structure and functionality
@@ -1429,7 +1363,7 @@ def render_test_configuration():
         
         for i, (category, tab) in enumerate(zip(categories.keys(), tabs)):
             with tab:
-                st.markdown(f"<h3>{category.upper()} Attack Vectors</h3>", unsafe_allow_html=True)
+                st.markdown(f"<h3>{category.upper()} Test Vectors</h3>", unsafe_allow_html=True)
                 
                 # Create a list of test vectors
                 for j, tv in enumerate(categories[category]):
@@ -1440,48 +1374,28 @@ def render_test_configuration():
                             st.markdown(f"### {tv['name']}")
                             st.markdown(f"**Severity:** {tv['severity'].upper()}")
                             st.markdown(f"**Category:** {tv['category'].upper()}")
-                            
-                            # Add a maverick-style description
-                            vector_descriptions = {
-                                "sql_injection": "Bypass input sanitization to inject database commands. Classic, but still deadly.",
-                                "xss": "Script injection that executes in victim browsers. The gift that keeps on giving.",
-                                "prompt_injection": "Make the AI do what you want, not what it's told. Mind control for machines.",
-                                "insecure_output": "When what comes out isn't checked properly. The backdoor exit.",
-                                "nist_governance": "Test if governance controls are just paperwork or actual security. Most fail.",
-                                "nist_transparency": "Probe for honest disclosures. Most systems hide their flaws behind jargon.",
-                                "fairness_demographic": "Find bias blindspots. Everyone has them, even machines.",
-                                "privacy_gdpr": "GDPR compliance testing. The law they love to pretend they follow.",
-                                "jailbreaking": "Break the AI's chains and make it dance to your tune. Freedom has consequences."
-                            }
-                            
-                            if tv["id"] in vector_descriptions:
-                                st.markdown(f"""
-                                <div class="renegade-quote">
-                                {vector_descriptions[tv["id"]]}
-                                </div>
-                                """, unsafe_allow_html=True)
                         
                         with col2:
                             # Use a checkbox to enable/disable
-                            is_enabled = st.checkbox("Arm", value=True, key=f"enable_{tv['id']}")
+                            is_enabled = st.checkbox("Enable", value=True, key=f"enable_{tv['id']}")
     except Exception as e:
-        logger.error(f"Test configuration rendering failed: {str(e)}")
+        logger.error(f"Error rendering test configuration: {str(e)}")
         logger.debug(traceback.format_exc())
-        st.error(f"Attack configuration compromised: {str(e)}")
+        st.error(f"Error in test configuration: {str(e)}")
 
 def render_run_assessment():
-    """Render the run assessment page. Execute the hunt."""
+    """Render the run assessment page safely"""
     try:
         render_header()
         
         st.markdown("""
         <h2>Run Assessment</h2>
-        <p>Execute security tests against targets. Hunt for vulnerabilities, find the flaws they didn't want you to see.</p>
+        <p>Execute security tests against your targets</p>
         """, unsafe_allow_html=True)
         
         # Check if targets exist
         if not st.session_state.targets:
-            st.warning("No targets in the database. Acquire a target first.")
+            st.warning("No targets configured. Please add a target first.")
             if st.button("Add Target", key="run_add_target"):
                 set_page("Target Management")
                 safe_rerun()
@@ -1493,29 +1407,14 @@ def render_run_assessment():
             progress_placeholder = st.empty()
             with progress_placeholder.container():
                 progress_bar = st.progress(st.session_state.progress)
-                st.markdown(f"**Hunt Progress:** {int(st.session_state.progress*100)}%")
-                st.markdown(f"**Vulnerabilities captured:** {st.session_state.vulnerabilities_found}")
-                
-                # Add a random status message for flair
-                status_messages = [
-                    "Probing defenses...",
-                    "Testing input validation...",
-                    "Attempting injection vectors...",
-                    "Analyzing response patterns...",
-                    "Checking content filters...",
-                    "Executing boundary tests...",
-                    "Searching for authentication bypasses...",
-                    "Mapping API attack surface...",
-                    "Testing rate limit countermeasures...",
-                    "Executing parameter fuzzing..."
-                ]
-                st.markdown(f"**Status:** {random.choice(status_messages)}")
+                st.markdown(f"**Progress:** {int(st.session_state.progress*100)}%")
+                st.markdown(f"**Vulnerabilities found:** {st.session_state.vulnerabilities_found}")
             
             # Stop button
-            if st.button("Abort Mission", key="stop_test"):
+            if st.button("Stop Test", key="stop_test"):
                 st.session_state.running_test = False
-                logger.info("Hunt aborted by operator")
-                st.warning("Mission aborted by operator")
+                logger.info("Test stopped by user")
+                st.warning("Test stopped by user")
                 safe_rerun()
         else:
             # Test configuration
@@ -1527,19 +1426,19 @@ def render_run_assessment():
                 selected_target = st.selectbox("Target", target_options, key="run_target")
             
             with col2:
-                st.markdown("<h3>Operation Parameters</h3>", unsafe_allow_html=True)
-                test_duration = st.slider("Operation Duration (seconds)", 5, 60, 30, key="run_duration", 
+                st.markdown("<h3>Test Parameters</h3>", unsafe_allow_html=True)
+                test_duration = st.slider("Test Duration (seconds)", 5, 60, 30, key="run_duration", 
                                          help="For demonstration purposes, we're using seconds. In a real system, this would be minutes.")
             
             # Environmental impact tracking option
-            st.markdown("<h3>Environmental Monitoring</h3>", unsafe_allow_html=True)
-            track_carbon = st.checkbox("Track Carbon Emissions During Operation", value=True, key="track_carbon_emissions")
+            st.markdown("<h3>Environmental Impact Tracking</h3>", unsafe_allow_html=True)
+            track_carbon = st.checkbox("Track Carbon Emissions During Test", value=True, key="track_carbon_emissions")
             
             if track_carbon:
-                st.info("Carbon tracking will be enabled during the assessment to measure environmental impact")
+                st.info("Carbon tracking will be enabled during the test to measure environmental impact")
             
             # Run test button
-            if st.button("Launch Operation", use_container_width=True, type="primary", key="start_assessment"):
+            if st.button("Run Assessment", use_container_width=True, type="primary", key="start_assessment"):
                 try:
                     # Find the selected target object
                     target = next((t for t in st.session_state.targets if t["name"] == selected_target), None)
@@ -1548,8 +1447,8 @@ def render_run_assessment():
                     if target:
                         # Initialize carbon tracking if requested
                         if track_carbon and 'carbon_tracker' not in st.session_state:
-                            st.session_state.carbon_tracker = CarbonTracker()
-                            st.session_state.carbon_tracker.initialize_tracker(f"Security Op - {target['name']}")
+                            st.session_state.carbon_tracker = CarbonImpactTracker()
+                            st.session_state.carbon_tracker.initialize_tracker(f"Security Test - {target['name']}")
                         
                         if track_carbon:
                             st.session_state.carbon_tracker.start_tracking()
@@ -1567,33 +1466,33 @@ def render_run_assessment():
                         st.session_state.active_threads.append(test_thread)
                         
                         st.session_state.running_test = True
-                        logger.info(f"Operation launched against {target['name']} with {len(test_vectors)} attack vectors")
-                        st.success("Operation initiated. The hunt begins!")
+                        logger.info(f"Started test against {target['name']} with {len(test_vectors)} vectors")
+                        st.success("Test started!")
                         safe_rerun()
                     else:
-                        st.error("Selected target not found in database")
+                        st.error("Selected target not found")
                 except Exception as e:
-                    logger.error(f"Assessment launch failed: {str(e)}")
-                    st.error(f"Failed to launch operation: {str(e)}")
+                    logger.error(f"Error starting test: {str(e)}")
+                    st.error(f"Failed to start test: {str(e)}")
     
     except Exception as e:
-        logger.error(f"Run assessment rendering failed: {str(e)}")
+        logger.error(f"Error rendering run assessment: {str(e)}")
         logger.debug(traceback.format_exc())
-        st.error(f"Assessment execution compromised: {str(e)}")
+        st.error(f"Error in run assessment: {str(e)}")
 
 def render_results_analyzer():
-    """Render the results analyzer page. Study your prey's weaknesses."""
+    """Render the results analyzer page safely"""
     try:
         render_header()
         
         st.markdown("""
-        <h2>Intel Analysis</h2>
-        <p>Analyze vulnerabilities and weaknesses. Knowledge is ammunition.</p>
+        <h2>Results Analyzer</h2>
+        <p>Explore and analyze security assessment results</p>
         """, unsafe_allow_html=True)
         
         # Check if there are results to display
         if not st.session_state.test_results:
-            st.warning("No intelligence available - Run an assessment to gather data.")
+            st.warning("No Results Available - Run an assessment to generate results.")
             
             if st.button("Go to Run Assessment", key="results_goto_run"):
                 set_page("Run Assessment")
@@ -1608,8 +1507,8 @@ def render_results_analyzer():
         # Create header with summary metrics
         st.markdown(f"""
         <div style="margin-bottom: 20px;">
-            <h3>Intelligence Report: {results.get("target", "Unknown Target")}</h3>
-            <div style="opacity: 0.7;">Operation completed: {results.get("timestamp", "Unknown")}</div>
+            <h3>Assessment Results: {results.get("target", "Unknown Target")}</h3>
+            <div style="opacity: 0.7;">Completed: {results.get("timestamp", "Unknown")}</div>
         </div>
         """, unsafe_allow_html=True)
         
@@ -1617,179 +1516,102 @@ def render_results_analyzer():
         col1, col2, col3 = st.columns(3)
         
         with col1:
-            st.metric("Tests Executed", summary.get("total_tests", 0))
+            st.metric("Tests Run", summary.get("total_tests", 0))
         
         with col2:
-            st.metric("Vulnerabilities Captured", summary.get("vulnerabilities_found", 0))
+            st.metric("Vulnerabilities", summary.get("vulnerabilities_found", 0))
         
         with col3:
             st.metric("Risk Score", summary.get("risk_score", 0))
         
-        # Add a quote for flair
-        st.markdown("""
-        <div class="renegade-quote">
-        You don't understand a system until you know exactly how it breaks. Now we know.
-        </div>
-        """, unsafe_allow_html=True)
+        # Visualizations
+        st.markdown("<h3>Vulnerability Overview</h3>", unsafe_allow_html=True)
         
         # Display vulnerabilities in a table
         if vulnerabilities:
-            st.markdown("<h3>Vulnerability Intelligence</h3>", unsafe_allow_html=True)
-            
             # Create a dataframe for display
             vuln_data = []
             for vuln in vulnerabilities:
                 vuln_data.append({
                     "ID": vuln.get("id", "Unknown"),
                     "Test Name": vuln.get("test_name", "Unknown"),
-                    "Severity": vuln.get("severity", "Unknown").upper(),
+                    "Severity": vuln.get("severity", "Unknown"),
                     "Details": vuln.get("details", "No details")
                 })
             
             df = pd.DataFrame(vuln_data)
-            
-            # Add color to the severity column
-            def highlight_severity(val):
-                color_map = {
-                    "LOW": "background-color: green; color: white",
-                    "MEDIUM": "background-color: orange; color: white",
-                    "HIGH": "background-color: red; color: white", 
-                    "CRITICAL": "background-color: darkred; color: white"
-                }
-                return color_map.get(val, "")
-            
-            # Apply the styling
-            styled_df = df.style.applymap(highlight_severity, subset=['Severity'])
-            
-            st.dataframe(styled_df, use_container_width=True)
-            
-            # Add some exploitation advice for each vulnerability
-            st.markdown("<h3>Exploitation Analysis</h3>", unsafe_allow_html=True)
-            
-            for i, vuln in enumerate(vulnerabilities[:3]):  # Show top 3 for brevity
-                with st.expander(f"{vuln['id']}: {vuln['test_name']} ({vuln['severity'].upper()})", expanded=i==0):
-                    st.markdown("#### Vulnerability Details")
-                    st.markdown(vuln["details"])
-                    
-                    st.markdown("#### How Attackers Would Exploit This")
-                    
-                    # Generate some plausible exploitation text based on the vector
-                    exploit_texts = {
-                        "sql_injection": "Attackers could craft malicious inputs containing SQL commands that execute arbitrary database operations, potentially extracting sensitive user data or corrupting database content.",
-                        "xss": "Malicious actors could inject client-side scripts into content viewed by other users, potentially stealing session tokens, hijacking user accounts, or performing unauthorized actions on behalf of the victim.",
-                        "prompt_injection": "By crafting specially designed prompts, attackers could manipulate the AI into generating harmful, biased, or unauthorized content that bypasses intended safeguards.",
-                        "insecure_output": "Output from the model could be manipulated to include malicious content that would be rendered or executed in downstream applications.",
-                        "jailbreaking": "Sophisticated prompt engineering techniques could be used to bypass AI guardrails, potentially causing the model to produce harmful content despite safety measures."
-                    }
-                    
-                    vector_id = vuln.get("test_vector", "")
-                    exploit_text = exploit_texts.get(vector_id, "Attackers could exploit this vulnerability to bypass security controls and potentially access or manipulate sensitive data.")
-                    
-                    st.markdown(exploit_text)
-                    
-                    st.markdown("#### Recommended Mitigations")
-                    
-                    # Mitigation advice based on vector
-                    mitigation_texts = {
-                        "sql_injection": "Implement parameterized queries, use ORM frameworks, apply input validation, and employ least privilege database accounts.",
-                        "xss": "Implement Content Security Policy (CSP), use auto-escaping templates, validate and sanitize user inputs, and employ XSS filters.",
-                        "prompt_injection": "Apply robust input filtering, implement multi-layered validation, use content classifiers, and add adversarial training to the model.",
-                        "insecure_output": "Implement output encoding, sanitize model outputs, apply content security policies, and validate outputs against expected patterns.",
-                        "jailbreaking": "Regularly update defense mechanisms, implement content filtering, use context-aware detection systems, and apply adversarial training to make models more resistant."
-                    }
-                    
-                    mitigation_text = mitigation_texts.get(vector_id, "Implement proper input validation, output encoding, access controls, and follow the principle of least privilege.")
-                    
-                    st.markdown(mitigation_text)
+            st.dataframe(df, use_container_width=True)
     
     except Exception as e:
-        logger.error(f"Results analyzer rendering failed: {str(e)}")
+        logger.error(f"Error rendering results analyzer: {str(e)}")
         logger.debug(traceback.format_exc())
-        st.error(f"Intel analysis compromised: {str(e)}")
+        st.error(f"Error in results analyzer: {str(e)}")
 
 def render_ethical_ai_testing():
-    """Render the ethical AI testing page. Ethics matter, even to mavericks."""
+    """Render the ethical AI testing page safely"""
     try:
         render_header()
         
         st.markdown("""
         <h2>Ethical AI Testing</h2>
-        <p>Test AI systems against ethical guidelines. Even renegades have standards.</p>
+        <p>Comprehensive assessment of AI systems against ethical guidelines</p>
         """, unsafe_allow_html=True)
         
         # Create tabs for different testing frameworks
         tabs = st.tabs(["OWASP LLM", "NIST Framework", "Fairness & Bias", "Privacy Compliance"])
         
         with tabs[0]:
-            st.markdown("<h3>OWASP LLM Top 10 Assessment</h3>", unsafe_allow_html=True)
-            
-            st.markdown("""
-            <div class="renegade-quote">
-            The OWASP Top 10 for LLMs is like a roadmap to all the places developers forgot to lock up. Let's go exploring.
-            </div>
-            """, unsafe_allow_html=True)
+            st.markdown("<h3>OWASP LLM Top 10 Testing</h3>", unsafe_allow_html=True)
             
             st.markdown("""
             This module tests AI systems against the OWASP Top 10 for Large Language Model Applications:
             
-            - Prompt Injection - Making the AI your puppet
-            - Insecure Output Handling - When the AI spills its secrets
-            - Training Data Poisoning - Corrupting the foundation
-            - Model Denial of Service - Breaking the brain
-            - Supply Chain Vulnerabilities - Trust issues at scale
-            - Sensitive Information Disclosure - When the AI talks too much
-            - Insecure Plugin Design - The backdoor into paradise
-            - Excessive Agency - When AI gets too big for its britches
-            - Overreliance - Trusting the machine too much
-            - Model Theft - Stealing the keys to the kingdom
+            - Prompt Injection
+            - Insecure Output Handling
+            - Training Data Poisoning
+            - Model Denial of Service
+            - Supply Chain Vulnerabilities
+            - Sensitive Information Disclosure
+            - Insecure Plugin Design
+            - Excessive Agency
+            - Overreliance
+            - Model Theft
             """)
             
-            if st.button("Run OWASP LLM Assessment", key="run_owasp"):
-                st.info("OWASP LLM assessment initiated. Hunting for vulnerabilities...")
+            if st.button("Run OWASP LLM Tests", key="run_owasp"):
+                st.info("OWASP LLM testing would start here")
         
         with tabs[1]:
             st.markdown("<h3>NIST AI Risk Management Framework</h3>", unsafe_allow_html=True)
             
             st.markdown("""
-            <div class="renegade-quote">
-            NIST frameworks are where good intentions meet reality. Let's see if they're actually implementing what they claim.
-            </div>
-            """, unsafe_allow_html=True)
-            
-            st.markdown("""
             This module evaluates AI systems against the NIST AI Risk Management Framework:
             
-            - Governance - Who's minding the store?
-            - Mapping - Do they even know what they're working with?
-            - Measurement - If you can't measure it, you can't manage it
-            - Management - Handling problems before they handle you
+            - Governance
+            - Mapping
+            - Measurement
+            - Management
             """)
             
             if st.button("Run NIST Framework Assessment", key="run_nist"):
-                st.info("NIST Framework assessment launched. Probing for weaknesses...")
+                st.info("NIST Framework assessment would start here")
         
         with tabs[2]:
             st.markdown("<h3>Fairness & Bias Testing</h3>", unsafe_allow_html=True)
             
             st.markdown("""
-            <div class="renegade-quote">
-            Everyone has biases - even machines learn them. The difference is, we can fix the machines.
-            </div>
-            """, unsafe_allow_html=True)
-            
-            st.markdown("""
             This module tests AI systems for fairness and bias issues:
             
-            - Demographic Parity - Does the system favor certain groups?
-            - Equal Opportunity - Does everyone get the same shot?
-            - Disparate Impact - Are the outcomes unfairly distributed?
-            - Representation Bias - Is everyone in the picture?
+            - Demographic Parity
+            - Equal Opportunity
+            - Disparate Impact
+            - Representation Bias
             """)
             
             if st.button("Run Fairness Assessment", key="run_fairness"):
-                st.info("Fairness assessment initiated. Hunting for bias...")
+                st.info("Fairness assessment would start here")
                 # Link to our dedicated bias testing page
-                st.markdown("For more comprehensive bias hunting, check out our Bias Testing arsenal")
+                st.markdown("For more comprehensive bias testing, visit our Bias Testing page")
                 if st.button("Go to Bias Testing", key="goto_bias_testing"):
                     set_page("Bias Testing")
                     safe_rerun()
@@ -1798,48 +1620,42 @@ def render_ethical_ai_testing():
             st.markdown("<h3>Privacy Compliance Testing</h3>", unsafe_allow_html=True)
             
             st.markdown("""
-            <div class="renegade-quote">
-            Privacy regulations are only as good as their enforcement. Let's see who's actually playing by the rules.
-            </div>
-            """, unsafe_allow_html=True)
-            
-            st.markdown("""
             This module tests AI systems for compliance with privacy regulations:
             
-            - GDPR - Europe's privacy shield
-            - CCPA - California's data rights
-            - HIPAA - Healthcare data protection
-            - PIPEDA - Canada's privacy law
+            - GDPR
+            - CCPA
+            - HIPAA
+            - PIPEDA
             """)
             
             if st.button("Run Privacy Assessment", key="run_privacy"):
-                st.info("Privacy assessment launched. Probing for regulatory violations...")
+                st.info("Privacy assessment would start here")
     
     except Exception as e:
-        logger.error(f"Ethical AI testing rendering failed: {str(e)}")
+        logger.error(f"Error rendering ethical AI testing: {str(e)}")
         logger.debug(traceback.format_exc())
-        st.error(f"Ethical testing module compromised: {str(e)}")
+        st.error(f"Error in ethical AI testing: {str(e)}")
 
 # ----------------------------------------------------------------
-# PAGE RENDERERS - BIAS AND ETHICS PAGES 
+# Page Renderers - Bias and Ethics Pages
 # ----------------------------------------------------------------
 
 def render_bias_testing():
-    """Render the bias testing page. Find the blindspots."""
+    """Render the bias testing page with WhyLabs integration"""
     try:
         render_header()
         
         st.markdown("""
-        <h2>AI Bias Hunting</h2>
-        <p>Detect and exploit bias in AI systems. Every system has blindspots - find them before the bad guys do.</p>
+        <h2>AI Bias Testing</h2>
+        <p>Analyze and mitigate bias in AI systems using WhyLabs</p>
         """, unsafe_allow_html=True)
         
-        # Initialize BiasHunter if not already done
-        if 'bias_hunter' not in st.session_state:
-            st.session_state.bias_hunter = BiasHunter()
+        # Initialize WhyLabs bias tester if not already done
+        if 'whylabs_bias_tester' not in st.session_state:
+            st.session_state.whylabs_bias_tester = WhyLabsBiasTest()
         
         # Sample data upload section
-        st.markdown("<h3>Upload Intelligence</h3>", unsafe_allow_html=True)
+        st.markdown("<h3>Upload Dataset</h3>", unsafe_allow_html=True)
         
         uploaded_file = st.file_uploader(
             "Upload CSV or Excel file", 
@@ -1848,7 +1664,7 @@ def render_bias_testing():
         )
         
         if uploaded_file is not None:
-            with st.spinner('Decrypting and analyzing data...'):
+            with st.spinner('Loading dataset...'):
                 try:
                     # Determine file type and read accordingly
                     file_extension = uploaded_file.name.split('.')[-1].lower()
@@ -1858,27 +1674,21 @@ def render_bias_testing():
                     elif file_extension in ['xlsx', 'xls']:
                         df = pd.read_excel(uploaded_file)
                     else:
-                        st.error("Unsupported file format. I need CSV or Excel.")
+                        st.error("Unsupported file format. Please upload a CSV or Excel file.")
                         return
                     
                     # Store the data
                     st.session_state.imported_data = df
                     st.session_state.imported_file_name = uploaded_file.name
                     
-                    st.success(f"Dataset decoded: {df.shape[0]} records, {df.shape[1]} variables")
+                    st.success(f"Dataset loaded successfully: {df.shape[0]} rows, {df.shape[1]} columns")
                     
                     # Display sample data
-                    st.markdown("<h4>Intelligence Preview</h4>", unsafe_allow_html=True)
+                    st.markdown("<h4>Dataset Preview</h4>", unsafe_allow_html=True)
                     st.dataframe(df.head())
                     
                     # Bias analysis configuration
                     st.markdown("<h3>Bias Testing Configuration</h3>", unsafe_allow_html=True)
-                    
-                    st.markdown("""
-                    <div class="renegade-quote">
-                    Bias isn't just a social problem, it's a security vulnerability. Let's find the cracks in the foundation.
-                    </div>
-                    """, unsafe_allow_html=True)
                     
                     col1, col2 = st.columns(2)
                     
@@ -1901,36 +1711,23 @@ def render_bias_testing():
                         )
                     
                     # Run analysis button
-                    if st.button("Hunt for Bias", type="primary", key="run_bias_analysis"):
+                    if st.button("Run Bias Analysis", type="primary", key="run_bias_analysis"):
                         if not protected_features:
-                            st.error("Need at least one protected attribute to hunt for bias")
+                            st.error("Please select at least one protected attribute")
                         elif not target_column:
-                            st.error("Need a target column to analyze outcomes")
+                            st.error("Please select a target column")
                         else:
-                            with st.spinner("Hunting for bias vulnerabilities..."):
-                                # In a real implementation, we'd use an actual bias analysis tool
-                                # Here we'll simulate with our BiasHunter
-                                bias_metrics = st.session_state.bias_hunter.analyze_bias(
-                                    df, protected_features, target_column, 
-                                    st.session_state.imported_file_name
-                                )
-                                
-                                if isinstance(bias_metrics, dict) and "error" in bias_metrics:
-                                    st.error(bias_metrics["error"])
-                                else:
-                                    st.success("Bias vulnerabilities identified!")
-                                    st.session_state.bias_results = bias_metrics
-                                    st.session_state.show_bias_results = True
-                                    safe_rerun()
+                            st.info("Bias analysis would run here in the full implementation")
+                            st.session_state.show_bias_results = True
                 
                 except Exception as e:
-                    st.error(f"Intelligence analysis failed: {str(e)}")
+                    st.error(f"Error loading dataset: {str(e)}")
         
-        # Option to use sample data - every maverick has a toolkit
-        st.markdown("<h3>Or Use Sample Intelligence</h3>", unsafe_allow_html=True)
+        # Option to use sample data
+        st.markdown("<h3>Or Use Sample Dataset</h3>", unsafe_allow_html=True)
         
         if st.button("Load Sample Dataset", key="load_sample_dataset"):
-            with st.spinner('Generating sample intelligence data...'):
+            with st.spinner('Loading sample dataset...'):
                 try:
                     # Create a sample dataset with potential bias
                     # Set seed for reproducibility
@@ -1949,7 +1746,7 @@ def render_bias_testing():
                     education = np.random.choice(['High School', 'Bachelor', 'Master', 'PhD'], size=n_samples)
                     experience = np.random.randint(0, 20, size=n_samples)
                     
-                    # Create biased outcomes - this is where the vulnerability lies
+                    # Create biased outcomes
                     gender_bias = (gender == 'Male') * 0.2
                     ethnicity_bias = np.zeros(n_samples)
                     ethnicity_bias[ethnicity == 'Group A'] = 0.1
@@ -1977,19 +1774,13 @@ def render_bias_testing():
                     st.session_state.imported_data = df
                     st.session_state.imported_file_name = "sample_biased_dataset.csv"
                     
-                    st.success("Sample dataset loaded successfully. Bias deliberately injected for testing.")
+                    st.success("Sample dataset loaded successfully")
                     
                     # Display sample data
                     st.dataframe(df.head())
                     
                     # Show sample bias metrics
-                    st.markdown("<h3>Bias Analysis Results</h3>", unsafe_allow_html=True)
-                    
-                    st.markdown("""
-                    <div class="renegade-quote">
-                    The numbers don't lie. This model clearly favors certain groups over others. Exploit found.
-                    </div>
-                    """, unsafe_allow_html=True)
+                    st.markdown("<h3>Bias Analysis Results (Sample)</h3>", unsafe_allow_html=True)
                     
                     col1, col2 = st.columns(2)
                     
@@ -2002,17 +1793,8 @@ def render_bias_testing():
                             y='Approved', 
                             title='Approval Rate by Gender',
                             color='Approved',
-                            color_continuous_scale='Plasma'
+                            color_continuous_scale='Viridis'
                         )
-                        
-                        # Customize for dark/light theme
-                        theme = get_theme()
-                        fig_gender.update_layout(
-                            paper_bgcolor='rgba(0,0,0,0)',
-                            plot_bgcolor='rgba(0,0,0,0)',
-                            font=dict(color=theme["text"])
-                        )
-                        
                         st.plotly_chart(fig_gender, use_container_width=True)
                     
                     with col2:
@@ -2024,68 +1806,29 @@ def render_bias_testing():
                             y='Approved', 
                             title='Approval Rate by Ethnicity',
                             color='Approved',
-                            color_continuous_scale='Plasma'
+                            color_continuous_scale='Viridis'
                         )
-                        
-                        # Customize for dark/light theme
-                        fig_ethnicity.update_layout(
-                            paper_bgcolor='rgba(0,0,0,0)',
-                            plot_bgcolor='rgba(0,0,0,0)',
-                            font=dict(color=theme["text"])
-                        )
-                        
                         st.plotly_chart(fig_ethnicity, use_container_width=True)
-                    
-                    # Add exploitation and mitigation advice
-                    st.markdown("<h3>Vulnerability Assessment</h3>", unsafe_allow_html=True)
-                    
-                    with st.expander("Exploitation Potential", expanded=True):
-                        st.markdown("""
-                        ### How This Bias Could Be Exploited
-                        
-                        This bias vulnerability creates several attack vectors:
-                        
-                        1. **Demographic Targeting**: Attackers could focus on exploiting the gender bias to increase approval rates for specific groups.
-                        2. **Fairness Attacks**: The system could be manipulated to produce unfair outcomes by strategically selecting input demographics.
-                        3. **Regulatory Exposure**: The bias could be reported to regulatory authorities, leading to compliance issues and penalties.
-                        4. **Reputational Damage**: Public exposure of the bias could damage the organization's reputation and trust.
-                        5. **Legal Liability**: The bias could create grounds for discrimination lawsuits.
-                        
-                        The disparity between Male and Female approval rates (~20%) and between Group A and Group D (~25%) exceeds thresholds that would trigger regulatory concerns in many jurisdictions.
-                        """)
-                    
-                    with st.expander("Mitigation Strategies"):
-                        st.markdown("""
-                        ### How To Fix This Vulnerability
-                        
-                        1. **Data Rebalancing**: Adjust the training data to ensure balanced representation across demographic groups.
-                        2. **Pre-processing Techniques**: Apply techniques like reweighing, disparate impact removal, or learning fair representations.
-                        3. **In-processing Fixes**: Implement adversarial debiasing or prejudice remover regularization during model training.
-                        4. **Post-processing Methods**: Apply calibrated equalized odds or reject option classification to the model outputs.
-                        5. **Ongoing Monitoring**: Implement continuous bias auditing to detect and address new bias patterns that emerge.
-                        
-                        The most effective approach usually combines multiple techniques and requires ongoing vigilance.
-                        """)
                 
                 except Exception as e:
-                    st.error(f"Error generating sample data: {str(e)}")
+                    st.error(f"Error creating sample dataset: {str(e)}")
     
     except Exception as e:
-        logger.error(f"Bias testing rendering failed: {str(e)}")
+        logger.error(f"Error rendering bias testing: {str(e)}")
         logger.debug(traceback.format_exc())
-        st.error(f"Bias hunting module compromised: {str(e)}")
+        st.error(f"Error in bias testing: {str(e)}")
 
 def render_bias_comparison():
-    """Render the bias comparison visualization page. Compare and contrast."""
+    """Render the bias comparison visualization page"""
     try:
         render_header()
         
         st.markdown("""
-        <h2>Bias Comparison Analysis</h2>
-        <p>Compare model bias against industry benchmarks. Know where you stand and where the weaknesses are.</p>
+        <h2>Bias Comparison Visualization</h2>
+        <p>Compare your model's bias metrics against industry benchmarks</p>
         """, unsafe_allow_html=True)
         
-        # Embed HTML component for bias comparison
+        # Embed the HTML visualization
         html_code = """
         <!DOCTYPE html>
         <html>
@@ -2093,10 +1836,10 @@ def render_bias_comparison():
           <meta charset="UTF-8">
           <title>Bias Comparison Visualization</title>
           <style>
-            body { font-family: 'Segoe UI', sans-serif; padding: 20px; background: rgba(0,0,0,0); color: inherit; }
+            body { font-family: 'Segoe UI', sans-serif; padding: 20px; background: #f8f9fa; }
             .bias-chart { margin: 20px 0; }
-            .chart-container { position: relative; height: 80px; background: rgba(255,255,255,0.1); border-radius: 8px; }
-            .model-score { position: absolute; top: 10px; height: 20px; background: #FF5722; color: white; text-align: center; line-height: 20px; border-radius: 4px; }
+            .chart-container { position: relative; height: 80px; background: #f1f3f4; border-radius: 8px; }
+            .model-score { position: absolute; top: 10px; height: 20px; background: #1a73e8; color: white; text-align: center; line-height: 20px; border-radius: 4px; }
             .benchmark { position: absolute; top: 40px; height: 20px; background: #e37400; color: white; text-align: center; line-height: 20px; border-radius: 4px; }
             .benchmark.top { background: #188038; }
           </style>
@@ -2107,19 +1850,13 @@ def render_bias_comparison():
             <div class="chart-container">
               <div class="model-score" style="width:65%">Your Model: 65%</div>
               <div class="benchmark" style="left:70%">Industry Avg: 70%</div>
-              <div class="benchmark top" style="left:85%">Top Performers: 85%</div>
+              <div class="benchmark top" style="left:85%">Top: 85%</div>
             </div>
           </div>
         </body>
         </html>
         """
-        components.html(html_code, height=150, scrolling=True)
-        
-        st.markdown("""
-        <div class="renegade-quote">
-        Knowing where you stand is the first step. Knowing where your competitors fail is the second.
-        </div>
-        """, unsafe_allow_html=True)
+        components.html(html_code, height=400, scrolling=True)
         
         # Additional performance metrics
         st.markdown("<h3>Detailed Bias Metrics</h3>", unsafe_allow_html=True)
@@ -2151,182 +1888,60 @@ def render_bias_comparison():
                 y='Approval Rate',
                 color='Approval Rate',
                 title="Approval Rates by Gender",
-                color_continuous_scale='Plasma'
+                color_continuous_scale='Viridis'
             )
-            
-            # Customize for dark/light theme
-            theme = get_theme()
-            fig.update_layout(
-                paper_bgcolor='rgba(0,0,0,0)',
-                plot_bgcolor='rgba(0,0,0,0)',
-                font=dict(color=theme["text"])
-            )
-            
             st.plotly_chart(fig, use_container_width=True)
-            
-            # Exploitation risk assessment
-            st.markdown("<h4>Vulnerability Assessment</h4>", unsafe_allow_html=True)
-            st.markdown("""
-            This model shows a significant gender bias with a 14% disparity between male and female approval rates.
-            
-            **Exploitation Risk**: HIGH
-            
-            A malicious actor could exploit this bias by:
-            1. Systematically using male personas to increase approval chances
-            2. Using this disparity to demonstrate discrimination in regulatory complaints
-            3. Manipulating input data to amplify the bias effect for specific cases
-            """)
         
-        with tabs[1]:
-            # Age bias metrics
-            col1, col2 = st.columns(2)
-            
-            with col1:
-                st.metric("Age Parity Difference", "0.23", "Higher is worse")
-                st.metric("Equal Opportunity Difference", "0.17", "Higher is worse")
-            
-            with col2:
-                st.metric("Disparate Impact Ratio", "0.77", "Closer to 1.0 is better")
-                st.metric("Treatment Equality Ratio", "0.83", "Closer to 1.0 is better")
-            
-            # Sample visualization
-            age_data = pd.DataFrame({
-                'Group': ['18-25', '26-35', '36-45', '46-55', '56+'],
-                'Approval Rate': [0.68, 0.73, 0.65, 0.59, 0.45]
-            })
-            
-            fig = px.bar(
-                age_data,
-                x='Group',
-                y='Approval Rate',
-                color='Approval Rate',
-                title="Approval Rates by Age Group",
-                color_continuous_scale='Plasma'
-            )
-            
-            # Customize for dark/light theme
-            fig.update_layout(
-                paper_bgcolor='rgba(0,0,0,0)',
-                plot_bgcolor='rgba(0,0,0,0)',
-                font=dict(color=theme["text"])
-            )
-            
-            st.plotly_chart(fig, use_container_width=True)
-            
-            # Exploitation risk assessment
-            st.markdown("<h4>Vulnerability Assessment</h4>", unsafe_allow_html=True)
-            st.markdown("""
-            This model shows significant age-based discrimination with particularly low approval rates for the 56+ age group.
-            
-            **Exploitation Risk**: VERY HIGH
-            
-            This vulnerability creates:
-            1. Regulatory risk (age discrimination is explicitly prohibited in many jurisdictions)
-            2. Potential for class-action lawsuits 
-            3. Opportunity for adversaries to manipulate age information to achieve desired outcomes
-            """)
+        # Other tabs would have similar content
         
         # Recommendations section
-        st.markdown("<h3>Bias Mitigation Strategy</h3>", unsafe_allow_html=True)
+        st.markdown("<h3>Bias Mitigation Recommendations</h3>", unsafe_allow_html=True)
         
         with st.expander("Pre-processing Techniques", expanded=True):
             st.markdown("""
-            - **Reweighing**: Adjust training example weights to ensure fair representation - gives you an immediate fix without retraining
-            - **Disparate Impact Removal**: Transform features to mathematically remove correlations with protected attributes
-            - **Learning Fair Representations**: Train models to create representations that encode the data well while obscuring protected attributes
+            - **Reweighing**: Assign weights to training examples to ensure fair representation
+            - **Disparate Impact Removal**: Transform features to remove correlation with protected attributes
+            - **Learning Fair Representations**: Learn intermediate representations that encode data well but obfuscate protected attributes
             """)
         
         with st.expander("In-processing Techniques"):
             st.markdown("""
-            - **Adversarial Debiasing**: Implement a system where one model tries to predict the protected attribute from the features, and the main model tries to prevent this
-            - **Prejudice Remover**: Add regularization terms to the objective function that penalize discriminatory predictions
-            - **Meta Fair Classifier**: Use an ensemble approach that combines multiple fair classifiers
+            - **Adversarial Debiasing**: Use adversarial techniques to remove bias during training
+            - **Prejudice Remover**: Add a regularization term to the objective function to reduce bias
+            - **Meta Fair Classifier**: Ensemble approach that combines multiple fair classifiers
             """)
         
         with st.expander("Post-processing Techniques"):
             st.markdown("""
-            - **Reject Option Classification**: Modify decision boundaries in regions of uncertainty to equalize outcomes
-            - **Equalized Odds Post-processing**: Adjust model outputs to ensure equal false positive and false negative rates across groups
-            - **Calibrated Equalized Odds**: Find the optimal trade-off between prediction accuracy and fairness
+            - **Reject Option Classification**: Modify the decision boundary in regions with high uncertainty
+            - **Equalized Odds Post-processing**: Adjust model outputs to ensure equal error rates
+            - **Calibrated Equalized Odds**: Optimize the trade-off between utility and fairness
             """)
         
         # Action buttons
         col1, col2 = st.columns(2)
         
         with col1:
-            if st.button("Generate Exploitation Report", key="gen_exploitation_report", use_container_width=True):
-                st.success("Generating comprehensive bias exploitation analysis...")
-                
-                with st.spinner("Analyzing attack vectors..."):
-                    time.sleep(1)
-                    
-                    st.markdown("""
-                    ### Bias Exploitation Report
-                    
-                    **Critical Vulnerabilities Identified:**
-                    
-                    1. **Gender Bias Exploit**: The 14% disparity creates a significant attack surface
-                    2. **Age Discrimination Vector**: 56+ group sees 28% lower approval than peak (26-35)
-                    3. **Intersectional Vulnerability**: Combined gender/age effects create 37% disparity in worst case
-                    
-                    **Attack Scenarios:**
-                    
-                    1. **Regulatory Arbitrage**: Reporting bias to authorities could trigger investigations
-                    2. **Legal Exposure**: Class action lawsuits based on discrimination evidence
-                    3. **Reputational Attack**: Public disclosure could damage brand trust
-                    4. **Input Manipulation**: Strategic data entry to exploit known biases
-                    
-                    **Risk Level: HIGH**
-                    """)
+            if st.button("Generate Mitigation Plan", key="gen_mitigation_plan", use_container_width=True):
+                st.success("Mitigation plan would be generated here")
         
         with col2:
-            if st.button("Generate Mitigation Plan", key="export_bias_report", use_container_width=True):
-                st.success("Generating bias mitigation strategy...")
-                
-                with st.spinner("Formulating countermeasures..."):
-                    time.sleep(1)
-                    
-                    st.markdown("""
-                    ### Bias Mitigation Plan
-                    
-                    **Immediate Actions:**
-                    
-                    1. Apply post-processing equalized odds to current model outputs
-                    2. Implement monitoring system to detect exploitation attempts
-                    3. Create fallback decision process for high-risk cases
-                    
-                    **Medium-term Solutions:**
-                    
-                    1. Retrain model with reweighed training data
-                    2. Implement adversarial debiasing during training
-                    3. Create dedicated bias response team
-                    
-                    **Long-term Strategy:**
-                    
-                    1. Develop comprehensive bias testing as part of CI/CD pipeline
-                    2. Implement explainable AI techniques to identify bias sources
-                    3. Create bias bounty program for external testing
-                    """)
+            if st.button("Export Bias Report", key="export_bias_report", use_container_width=True):
+                st.success("Bias report would be exported here")
     
     except Exception as e:
-        logger.error(f"Bias comparison rendering failed: {str(e)}")
+        logger.error(f"Error rendering bias comparison: {str(e)}")
         logger.debug(traceback.format_exc())
-        st.error(f"Bias comparison module compromised: {str(e)}")
+        st.error(f"Error in bias comparison: {str(e)}")
 
 def render_bias_labs_integration():
-    """Render the bias labs integration page. Connect with the pros."""
+    """Render the bias labs integration page"""
     try:
         render_header()
         
         st.markdown("""
         <h2>Bias Labs Integration</h2>
-        <p>Connect with external bias analysis frameworks. Bring in the specialists.</p>
-        """, unsafe_allow_html=True)
-        
-        st.markdown("""
-        <div class="renegade-quote">
-        For the toughest bias problems, bring in the specialists. Even mavericks know when to call for backup.
-        </div>
+        <p>Connect with external bias analysis frameworks</p>
         """, unsafe_allow_html=True)
         
         # Embed HTML component for bias labs
@@ -2337,9 +1952,8 @@ def render_bias_labs_integration():
           <meta charset="UTF-8">
           <title>Bias Labs Integration</title>
           <style>
-            body { font-family: 'Segoe UI', sans-serif; padding: 20px; background: rgba(0,0,0,0); color: inherit; }
+            body { font-family: 'Segoe UI', sans-serif; padding: 20px; background: #f8f9fa; }
             .container { max-width: 800px; margin: 0 auto; }
-            pre { background: rgba(0,0,0,0.1); padding: 10px; border-radius: 4px; overflow: auto; }
           </style>
           <script>
             class BiasLabsIntegration {
@@ -2361,7 +1975,7 @@ def render_bias_labs_integration():
                   tasks.push(this.evaluateWithLab(labId, model, options, results));
                 }
                 await Promise.all(tasks);
-                results.aggregate_metrics = { fairness_score: 65, demographic_parity: 0.18, equal_opportunity: 0.15 }; // Sample metrics
+                results.aggregate_metrics = { fairness_score: 65, demographic_parity: 0.18, equal_opportunity: 0.15 }; // Dummy metrics
                 results.recommendations = [{ area: "fairness", recommendation: "Improve fairness", priority: "high" }];
                 this.testResults[model.id + "-" + Date.now()] = results;
                 return results;
@@ -2382,16 +1996,16 @@ def render_bias_labs_integration():
         </head>
         <body>
           <div class="container">
-            <h3>Bias Labs Control Panel</h3>
-            <input type="text" id="model-id" placeholder="Model ID" value="gpt-4-turbo">
-            <input type="text" id="model-provider" placeholder="Model Provider" value="openai">
-            <button onclick="runBiasEvaluation()" style="background: #FF5722; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer;">Execute Bias Analysis</button>
+            <h2>Bias Labs Integration</h2>
+            <input type="text" id="model-id" placeholder="Model ID" value="example-model">
+            <input type="text" id="model-provider" placeholder="Model Provider" value="example-provider">
+            <button onclick="runBiasEvaluation()">Run Bias Labs Evaluation</button>
             <pre id="lab-results"></pre>
           </div>
         </body>
         </html>
         """
-        components.html(html_code, height=400, scrolling=True)
+        components.html(html_code, height=600, scrolling=True)
         
         # Integration configuration
         st.markdown("<h3>Configure Bias Labs</h3>", unsafe_allow_html=True)
@@ -2402,16 +2016,12 @@ def render_bias_labs_integration():
         col1, col2 = st.columns(2)
         
         with col1:
-            st.checkbox("Stanford HELM", value=True, key="enable_helm", 
-                       help="Holistic Evaluation of Language Models - comprehensive testing framework")
-            st.checkbox("Microsoft Fairlearn", value=True, key="enable_fairlearn",
-                       help="Microsoft's fairness assessment toolkit with multiple bias metrics")
+            st.checkbox("Stanford HELM", value=True, key="enable_helm")
+            st.checkbox("Microsoft Fairlearn", value=True, key="enable_fairlearn")
         
         with col2:
-            st.checkbox("UChicago Aequitas", value=False, key="enable_aequitas",
-                       help="Open source bias audit toolkit developed by UChicago's Center for Data Science")
-            st.checkbox("Google What-If Tool", value=False, key="enable_withiftool",
-                       help="Google's tool for analyzing ML models through visualization")
+            st.checkbox("UChicago Aequitas", value=False, key="enable_aequitas")
+            st.checkbox("Google What-If Tool", value=False, key="enable_withifool")
         
         # API configuration
         st.markdown("<h4>API Configuration</h4>", unsafe_allow_html=True)
@@ -2422,54 +2032,24 @@ def render_bias_labs_integration():
             st.text_input("Aequitas API Key", type="password", key="aequitas_api_key")
             st.text_input("What-If Tool API Key", type="password", key="whatif_api_key")
         
-        # Testing parameters
-        st.markdown("<h4>Testing Parameters</h4>", unsafe_allow_html=True)
-        
-        col1, col2 = st.columns(2)
-        
-        with col1:
-            st.selectbox("Model Type", ["Language Model", "Vision Model", "Multimodal", "Classification", "Ranking"], key="bias_model_type")
-            st.slider("Test Complexity", 1, 10, 5, key="bias_test_complexity",
-                     help="Higher values run more comprehensive tests but take longer")
-        
-        with col2:
-            st.multiselect("Protected Attributes", ["Gender", "Age", "Race/Ethnicity", "Religion", "Disability", "Nationality", "Sexual Orientation"], 
-                          default=["Gender", "Race/Ethnicity"], key="bias_protected_attrs")
-            st.checkbox("Generate Exploitation Report", value=True, key="bias_exploit_report",
-                       help="Analyzes how discovered biases could potentially be exploited")
-        
         # Save configuration button
         if st.button("Save Bias Labs Configuration", key="save_bias_labs"):
             st.session_state.bias_labs_enabled = True
-            st.success("Bias labs configuration locked and loaded!")
-            
-            # Show exploitation potential
-            st.markdown("""
-            <h4>Vulnerability Intelligence</h4>
-            <div class="hacker-alert">
-            Preliminary analysis shows potential bias vulnerabilities in the selected model. Full testing may reveal exploitable weaknesses that could be used for targeted attacks or regulatory exposure.
-            </div>
-            """, unsafe_allow_html=True)
+            st.success("Bias labs configuration saved successfully!")
     
     except Exception as e:
-        logger.error(f"Bias labs integration rendering failed: {str(e)}")
+        logger.error(f"Error rendering bias labs integration: {str(e)}")
         logger.debug(traceback.format_exc())
-        st.error(f"Bias labs integration compromised: {str(e)}")
+        st.error(f"Error in bias labs integration: {str(e)}")
 
 def render_helm_evaluation():
-    """Render the HELM evaluation page. The heavy artillery."""
+    """Render the HELM evaluation page"""
     try:
         render_header()
         
         st.markdown("""
         <h2>HELM Evaluation</h2>
-        <p>Evaluate models using Stanford's Holistic Evaluation of Language Models framework.</p>
-        """, unsafe_allow_html=True)
-        
-        st.markdown("""
-        <div class="renegade-quote">
-        HELM is the academic's heavy artillery. When you need to thoroughly dissect a model, this is your weapon of choice.
-        </div>
+        <p>Evaluate models using the Holistic Evaluation of Language Models framework</p>
         """, unsafe_allow_html=True)
         
         # Embed the HTML component
@@ -2480,14 +2060,12 @@ def render_helm_evaluation():
           <meta charset="UTF-8">
           <title>HELM Evaluation</title>
           <style>
-            body { font-family: 'Segoe UI', sans-serif; padding: 20px; background: rgba(0,0,0,0); color: inherit; }
-            pre { background: rgba(0,0,0,0.1); padding: 10px; border-radius: 4px; overflow: auto; }
-            .btn { padding: 8px 16px; background: #FF5722; color: white; border: none; border-radius: 4px; cursor: pointer; }
+            body { font-family: 'Segoe UI', sans-serif; padding: 20px; background: #f8f9fa; }
+            .btn { padding: 8px 16px; background: #1a73e8; color: white; border: none; border-radius: 4px; cursor: pointer; }
           </style>
           <script>
             async function evaluateWithHELM(model, scenarios) {
               // Simulated HELM API call
-              await new Promise(resolve => setTimeout(resolve, 1000));
               return { fairness: 0.65, toxicity: 0.10, stereotype: 0.15, source: "HELM" };
             }
             document.addEventListener("DOMContentLoaded", () => {
@@ -2497,26 +2075,23 @@ def render_helm_evaluation():
                   provider: document.getElementById("model-provider").value 
                 };
                 const scenarios = document.getElementById("scenarios").value.split(",");
-                document.getElementById("helm-status").innerText = "Evaluation in progress...";
                 const results = await evaluateWithHELM(model, scenarios);
                 document.getElementById("helm-results").innerText = JSON.stringify(results, null, 2);
-                document.getElementById("helm-status").innerText = "Evaluation complete!";
               });
             });
           </script>
         </head>
         <body>
-          <h3>HELM Control Panel</h3>
-          <input type="text" id="model-id" placeholder="Model ID" value="gpt-4-turbo">
-          <input type="text" id="model-provider" placeholder="Model Provider" value="openai">
-          <input type="text" id="scenarios" placeholder="Scenarios (comma separated)" value="toxicity,stereotype,fairness">
-          <button class="btn" id="run-helm">Execute HELM Evaluation</button>
-          <div id="helm-status" style="margin-top: 10px; font-style: italic;"></div>
+          <h2>HELM Evaluation</h2>
+          <input type="text" id="model-id" placeholder="Model ID" value="example-model">
+          <input type="text" id="model-provider" placeholder="Model Provider" value="example-provider">
+          <input type="text" id="scenarios" placeholder="Scenarios (comma separated)" value="scenario1,scenario2">
+          <button class="btn" id="run-helm">Run HELM Evaluation</button>
           <pre id="helm-results"></pre>
         </body>
         </html>
         """
-        components.html(html_code, height=300, scrolling=True)
+        components.html(html_code, height=600, scrolling=True)
         
         # Additional HELM configuration
         st.markdown("<h3>HELM Configuration</h3>", unsafe_allow_html=True)
@@ -2548,7 +2123,7 @@ def render_helm_evaluation():
             timeout = st.slider("Timeout (seconds)", 1, 60, 30)
         
         # Run evaluation button
-        if st.button("Launch HELM Evaluation", key="run_helm_eval", type="primary"):
+        if st.button("Run HELM Evaluation", key="run_helm_eval", type="primary"):
             with st.spinner("Running HELM evaluation..."):
                 # Simulate evaluation
                 time.sleep(2)
@@ -2572,81 +2147,37 @@ def render_helm_evaluation():
                     title="HELM Evaluation Results",
                     labels={"x": "Dimension", "y": "Score"},
                     color=list(results_data.values()),
-                    color_continuous_scale="Plasma"
-                )
-                
-                # Customize for dark/light theme
-                theme = get_theme()
-                fig.update_layout(
-                    paper_bgcolor='rgba(0,0,0,0)',
-                    plot_bgcolor='rgba(0,0,0,0)',
-                    font=dict(color=theme["text"])
+                    color_continuous_scale="Viridis"
                 )
                 
                 st.plotly_chart(fig, use_container_width=True)
-                
-                # Detailed results
-                st.markdown("<h3>Detailed Findings</h3>", unsafe_allow_html=True)
-                
-                with st.expander("Stereotype & Bias Analysis", expanded=True):
-                    st.markdown("""
-                    #### Gender Stereotypes
-                    
-                    The model showed moderate bias in profession-related prompts (19% disparity):
-                    - Preferentially associated males with STEM professions
-                    - Preferentially associated females with caring professions
-                    
-                    **Exploitability: MEDIUM**
-                    
-                    This bias could be exploited by adversaries to manipulate model outputs in professional contexts, reinforcing existing stereotypes, or creating discriminatory content that appears authoritative.
-                    """)
-                
-                with st.expander("Toxicity Analysis"):
-                    st.markdown("""
-                    #### Toxicity Resistance
-                    
-                    The model showed good resistance to generating toxic content (12% failure rate):
-                    - Strong resistance to explicit hate speech
-                    - Moderate resistance to subtle derogatory content
-                    - Some vulnerability to toxicity when prompted with ambiguous scenarios
-                    
-                    **Exploitability: LOW**
-                    
-                    While generally resistant, specific edge cases could be exploited by crafting scenarios with ambiguous moral contexts where the model fails to recognize subtle toxic framing.
-                    """)
     
     except Exception as e:
-        logger.error(f"HELM evaluation rendering failed: {str(e)}")
+        logger.error(f"Error rendering HELM evaluation: {str(e)}")
         logger.debug(traceback.format_exc())
-        st.error(f"HELM evaluation compromised: {str(e)}")
+        st.error(f"Error in HELM evaluation: {str(e)}")
 
 # ----------------------------------------------------------------
-# PAGE RENDERERS - SUSTAINABILITY PAGES 
+# Page Renderers - Sustainability Pages
 # ----------------------------------------------------------------
 
 def render_environmental_impact():
-    """Render the environmental impact assessment page. Fight clean."""
+    """Render the environmental impact assessment page"""
     try:
         render_header()
         
         st.markdown("""
         <h2>Environmental Impact Assessment</h2>
-        <p>Analyze and mitigate the carbon footprint of AI systems. Breaking systems shouldn't break the planet.</p>
-        """, unsafe_allow_html=True)
-        
-        st.markdown("""
-        <div class="renegade-quote">
-        Even mavericks care about the planet. We break systems, not ecosystems.
-        </div>
+        <p>Analyze and mitigate the carbon footprint of your AI systems</p>
         """, unsafe_allow_html=True)
         
         # Initialize carbon tracker if not already done
         if 'carbon_tracker' not in st.session_state:
-            st.session_state.carbon_tracker = CarbonTracker()
+            st.session_state.carbon_tracker = CarbonImpactTracker()
             st.session_state.carbon_tracker_initialized = False
         
         # Create tabs for different functionality
-        tabs = st.tabs(["Carbon Tracking", "Model Analysis", "Optimization Strategy"])
+        tabs = st.tabs(["Carbon Measurement", "Model Analysis", "Optimization Strategies"])
         
         with tabs[0]:
             st.markdown("<h3>Carbon Emission Tracking</h3>", unsafe_allow_html=True)
@@ -2661,10 +2192,10 @@ def render_environmental_impact():
                         
                         if success:
                             st.session_state.carbon_tracker_initialized = True
-                            st.success("Carbon tracker initialized and ready for action!")
+                            st.success("Carbon tracker initialized successfully!")
                             safe_rerun()
                         else:
-                            st.error("Tracker initialization failed. Systems compromised.")
+                            st.error("Failed to initialize carbon tracker. Please check logs for details.")
             else:
                 # Tracking controls
                 if not st.session_state.get("carbon_tracking_active", False):
@@ -2673,16 +2204,16 @@ def render_environmental_impact():
                         
                         if success:
                             st.session_state.carbon_tracking_active = True
-                            st.success("Carbon tracking initiated!")
+                            st.success("Carbon tracking started!")
                             safe_rerun()
                         else:
-                            st.error("Failed to start carbon tracking. Systems compromised.")
+                            st.error("Failed to start carbon tracking. Please check logs for details.")
                 else:
                     if st.button("Stop Carbon Tracking", key="stop_carbon_tracking", type="primary"):
                         emissions = st.session_state.carbon_tracker.stop_tracking()
                         
                         st.session_state.carbon_tracking_active = False
-                        st.success(f"Carbon tracking completed! Measured: {emissions:.6f} kg CO2eq")
+                        st.success(f"Carbon tracking stopped! Measured: {emissions:.6f} kg CO2eq")
                         
                         # Store the last measurement
                         if 'carbon_measurements' not in st.session_state:
@@ -2739,14 +2270,6 @@ def render_environmental_impact():
                             labels={'timestamp': 'Time', 'emissions_kg': 'Emissions (kg CO2eq)'}
                         )
                         
-                        # Customize for dark/light theme
-                        theme = get_theme()
-                        fig.update_layout(
-                            paper_bgcolor='rgba(0,0,0,0)',
-                            plot_bgcolor='rgba(0,0,0,0)',
-                            font=dict(color=theme["text"])
-                        )
-                        
                         st.plotly_chart(fig, use_container_width=True)
         
         with tabs[1]:
@@ -2756,7 +2279,7 @@ def render_environmental_impact():
             
             with col1:
                 model_name = st.text_input("Model Name", value="", key="model_name")
-                model_parameters = st.number_input("Model Parameters (billions)", min_value=0.1, max_value=1000000.0, value=1.0, key="model_parameters")
+                model_parameters = st.number_input("Model Parameters (millions)", min_value=0.1, max_value=1000000.0, value=1.0, key="model_parameters")
                 training_hours = st.number_input("Training Hours", min_value=0, max_value=10000, value=24, key="training_hours")
             
             with col2:
@@ -2778,7 +2301,7 @@ def render_environmental_impact():
                 total_emissions = training_emissions + yearly_inference
                 
                 # Show results
-                st.markdown("<h4>Carbon Footprint Intelligence</h4>", unsafe_allow_html=True)
+                st.markdown("<h4>Carbon Footprint Results</h4>", unsafe_allow_html=True)
                 
                 col1, col2, col3 = st.columns(3)
                 
@@ -2802,49 +2325,13 @@ def render_environmental_impact():
                     x="Source",
                     y="Emissions (kg CO2)",
                     title="Carbon Emissions Breakdown",
-                    color="Source",
-                    color_discrete_sequence=[get_theme()["primary"], get_theme()["secondary"]]
-                )
-                
-                # Customize for dark/light theme
-                theme = get_theme()
-                fig.update_layout(
-                    paper_bgcolor='rgba(0,0,0,0)',
-                    plot_bgcolor='rgba(0,0,0,0)',
-                    font=dict(color=theme["text"])
+                    color="Source"
                 )
                 
                 st.plotly_chart(fig, use_container_width=True)
-                
-                # Add impact assessment
-                st.markdown("<h4>Environmental Impact Assessment</h4>", unsafe_allow_html=True)
-                
-                impact_level = "HIGH" if total_emissions > 1000 else "MEDIUM" if total_emissions > 100 else "LOW"
-                
-                st.markdown(f"""
-                **Impact Level: {impact_level}**
-                
-                This model's carbon footprint represents:
-                - Equivalent to driving {total_emissions * 2.4:.1f} miles in an average car
-                - Would require {total_emissions * 0.06:.1f} trees growing for a year to offset
-                - Consumes approximately {total_emissions / 0.5:.1f} kWh of electricity
-                
-                **Vulnerability Assessment:**
-                
-                This environmental impact could pose risks in:
-                - Regulatory compliance in regions with carbon reporting requirements
-                - ESG (Environmental, Social, Governance) performance metrics
-                - Public perception and brand reputation
-                """)
         
         with tabs[2]:
             st.markdown("<h3>Carbon Optimization Strategies</h3>", unsafe_allow_html=True)
-            
-            st.markdown("""
-            <div class="renegade-quote">
-            Fighting dirty doesn't mean a dirty planet. Optimize your operations to minimize your footprint.
-            </div>
-            """, unsafe_allow_html=True)
             
             # Describe different strategies
             strategies = [
@@ -2856,9 +2343,7 @@ def render_environmental_impact():
                         "Knowledge Distillation - Train smaller models using larger models as teachers",
                         "Neural Architecture Search - Automatically find efficient architectures",
                         "Sparsity - Encourage sparse activations and weights"
-                    ],
-                    "savings": "20-60%",
-                    "difficulty": "Medium"
+                    ]
                 },
                 {
                     "name": "Quantization and Precision Reduction",
@@ -2868,175 +2353,42 @@ def render_environmental_impact():
                         "Quantization-aware training - Train with simulated quantization",
                         "Mixed-precision training - Use different precisions for different operations",
                         "Binary/ternary networks - Use 1-bit or 2-bit weights"
-                    ],
-                    "savings": "60-75%",
-                    "difficulty": "Medium"
+                    ]
                 },
                 {
-                    "name": "Carbon-Aware Scheduling",
-                    "description": "Schedule computation based on carbon intensity of electricity.",
+                    "name": "Efficient Training Strategies",
+                    "description": "Optimize the training process to reduce computational requirements.",
                     "techniques": [
-                        "Time-shifting - Move computations to when grid is greener",
-                        "Location-shifting - Route requests to lower-carbon regions",
-                        "Carbon-intensity API integration - Real-time carbon data",
-                        "Dynamic scaling - Adjust compute based on carbon signals"
-                    ],
-                    "savings": "15-40%",
-                    "difficulty": "Low"
+                        "Transfer learning - Start from pre-trained models",
+                        "Early stopping - Terminate training when validation performance plateaus",
+                        "Learning rate scheduling - Optimize convergence speed",
+                        "Gradient accumulation - Reduce memory requirements"
+                    ]
                 }
             ]
             
             # Create expandable sections for each strategy
             for i, strategy in enumerate(strategies):
-                with st.expander(f"{i+1}. {strategy['name']} - {strategy['savings']} savings", expanded=i==0):
+                with st.expander(f"{i+1}. {strategy['name']}", expanded=i==0):
                     st.markdown(f"**{strategy['description']}**")
                     
                     st.markdown("#### Key Techniques")
                     for technique in strategy['techniques']:
                         st.markdown(f"- {technique}")
-                    
-                    st.markdown(f"**Implementation Difficulty:** {strategy['difficulty']}")
-                    
-                    # Add exploitation aspect
-                    if strategy['name'] == "Model Architecture Optimization":
-                        st.markdown("""
-                        #### Security Considerations
-                        
-                        When implementing model pruning and distillation, be aware that:
-                        - Attackers could potentially exploit simplified decision boundaries
-                        - Reduced precision can create new attack surfaces
-                        - Some security features may be inadvertently pruned
-                        
-                        **Always test security after optimization!**
-                        """)
-                    elif strategy['name'] == "Quantization and Precision Reduction":
-                        st.markdown("""
-                        #### Security Considerations
-                        
-                        Quantization can introduce security vulnerabilities:
-                        - Reduced numerical precision can be exploited in adversarial attacks
-                        - Model behavior becomes more deterministic and potentially predictable
-                        - Edge cases may be handled differently than in full-precision models
-                        
-                        **Security testing should include quantized versions!**
-                        """)
-            
-            # Carbon reduction calculator
-            st.markdown("<h3>Carbon Reduction Calculator</h3>", unsafe_allow_html=True)
-            
-            col1, col2 = st.columns(2)
-            
-            with col1:
-                baseline_emissions = st.number_input("Baseline Annual Emissions (kg CO2eq)", min_value=0.0, value=1000.0, key="baseline_emissions")
-                apply_distillation = st.checkbox("Apply Model Distillation (70-90% reduction)", value=True, key="apply_distillation")
-                apply_quantization = st.checkbox("Apply Quantization (60-75% reduction)", value=True, key="apply_quantization")
-            
-            with col2:
-                carbon_aware_scheduling = st.checkbox("Carbon-Aware Scheduling (15-40% reduction)", value=True, key="carbon_aware")
-                efficient_hardware = st.checkbox("Use Efficient Hardware (20-60% reduction)", value=True, key="efficient_hardware")
-                apply_caching = st.checkbox("Implement Result Caching (10-30% reduction)", value=False, key="apply_caching")
-            
-            if st.button("Calculate Potential Savings", key="calc_savings", type="primary"):
-                # Calculate combined reductions
-                reduction_factors = []
-                
-                if apply_distillation:
-                    reduction_factors.append(0.8)  # 80% reduction
-                
-                if apply_quantization:
-                    # Apply to remaining emissions after previous reductions
-                    remaining = 1.0
-                    for factor in reduction_factors:
-                        remaining *= (1 - factor)
-                    
-                    reduction_factors.append(0.7 * remaining)  # 70% reduction of remaining
-                
-                if carbon_aware_scheduling:
-                    # Apply to remaining emissions
-                    remaining = 1.0
-                    for factor in reduction_factors:
-                        remaining *= (1 - factor)
-                    
-                    reduction_factors.append(0.25 * remaining)  # 25% reduction of remaining
-                
-                if efficient_hardware:
-                    # Apply to remaining emissions
-                    remaining = 1.0
-                    for factor in reduction_factors:
-                        remaining *= (1 - factor)
-                    
-                    reduction_factors.append(0.4 * remaining)  # 40% reduction of remaining
-                
-                if apply_caching:
-                    # Apply to remaining emissions
-                    remaining = 1.0
-                    for factor in reduction_factors:
-                        remaining *= (1 - factor)
-                    
-                    reduction_factors.append(0.2 * remaining)  # 20% reduction of remaining
-                
-                # Calculate total reduction
-                total_reduction = sum(reduction_factors)
-                
-                # Calculate new emissions
-                new_emissions = baseline_emissions * (1 - total_reduction)
-                emissions_saved = baseline_emissions - new_emissions
-                
-                st.success(f"Potential carbon reduction: {total_reduction*100:.1f}%")
-                
-                # Display results
-                col1, col2, col3 = st.columns(3)
-                
-                with col1:
-                    st.metric("Baseline Emissions", f"{baseline_emissions:.2f} kg CO2eq")
-                
-                with col2:
-                    st.metric("New Emissions", f"{new_emissions:.2f} kg CO2eq")
-                
-                with col3:
-                    st.metric("Reduction", f"{total_reduction*100:.1f}%")
-                
-                # Visualize comparison
-                fig = go.Figure()
-                
-                fig.add_trace(go.Bar(
-                    x=["Baseline", "Optimized"],
-                    y=[baseline_emissions, new_emissions],
-                    marker_color=[get_theme()["error"], get_theme()["primary"]]
-                ))
-                
-                # Customize for dark/light theme
-                theme = get_theme()
-                fig.update_layout(
-                    title="Emission Comparison",
-                    yaxis_title="CO2 Emissions (kg)",
-                    margin=dict(l=20, r=20, t=40, b=20),
-                    paper_bgcolor='rgba(0,0,0,0)',
-                    plot_bgcolor='rgba(0,0,0,0)',
-                    font=dict(color=theme["text"])
-                )
-                
-                st.plotly_chart(fig, use_container_width=True)
     
     except Exception as e:
-        logger.error(f"Environmental impact rendering failed: {str(e)}")
+        logger.error(f"Error rendering environmental impact: {str(e)}")
         logger.debug(traceback.format_exc())
-        st.error(f"Environmental impact module compromised: {str(e)}")
+        st.error(f"Error in environmental impact assessment: {str(e)}")
 
 def render_sustainability_dashboard():
-    """Render the sustainability dashboard page. Monitor your footprint."""
+    """Render the sustainability dashboard page"""
     try:
         render_header()
         
         st.markdown("""
         <h2>Sustainability Dashboard</h2>
-        <p>Monitor and optimize the environmental impact of AI systems. Keep your operations clean.</p>
-        """, unsafe_allow_html=True)
-        
-        st.markdown("""
-        <div class="renegade-quote">
-        The best hackers leave no trace - not on systems, not on the planet.
-        </div>
+        <p>Monitor and optimize the environmental impact of your AI systems</p>
         """, unsafe_allow_html=True)
         
         # Overview metrics
@@ -3089,7 +2441,7 @@ def render_sustainability_dashboard():
                         x=measurements_df["timestamp"],
                         y=measurements_df["emissions_kg"],
                         name="Individual Measurements",
-                        marker_color=get_theme()["primary"]
+                        marker_color="rgba(29, 185, 84, 0.6)"
                     ),
                     secondary_y=False
                 )
@@ -3100,13 +2452,11 @@ def render_sustainability_dashboard():
                         x=measurements_df["timestamp"],
                         y=measurements_df["cumulative_emissions"],
                         name="Cumulative Emissions",
-                        line=dict(color=get_theme()["secondary"])
+                        line=dict(color="rgba(187, 134, 252, 1)")
                     ),
                     secondary_y=True
                 )
                 
-                # Customize for dark/light theme
-                theme = get_theme()
                 fig.update_layout(
                     title="Carbon Emissions Over Time",
                     xaxis_title="Date",
@@ -3116,10 +2466,7 @@ def render_sustainability_dashboard():
                         y=1.02,
                         xanchor="right",
                         x=1
-                    ),
-                    paper_bgcolor='rgba(0,0,0,0)',
-                    plot_bgcolor='rgba(0,0,0,0)',
-                    font=dict(color=theme["text"])
+                    )
                 )
                 
                 fig.update_yaxes(title_text="Individual Measurements (kg CO2e)", secondary_y=False)
@@ -3127,9 +2474,9 @@ def render_sustainability_dashboard():
                 
                 st.plotly_chart(fig, use_container_width=True)
             else:
-                st.info("No emissions data available yet. Run tests with carbon tracking enabled to collect intel.")
+                st.info("No emissions data available yet. Run tests with carbon tracking enabled to collect data.")
         else:
-            st.info("No emissions data available yet. Run tests with carbon tracking enabled to collect intel.")
+            st.info("No emissions data available yet. Run tests with carbon tracking enabled to collect data.")
         
         # Optimization recommendations
         st.markdown("<h3>Sustainability Recommendations</h3>", unsafe_allow_html=True)
@@ -3158,53 +2505,23 @@ def render_sustainability_dashboard():
         for i, rec in enumerate(recommendations):
             with st.expander(f"{rec['title']} (Impact: {rec['impact']}, Effort: {rec['effort']})", expanded=i==0):
                 st.markdown(rec["description"])
-                
-                # Add security considerations
-                if rec['title'] == "Switch to Smaller Models":
-                    st.markdown("""
-                    **Security Considerations:**
-                    
-                    Smaller models may have different security characteristics:
-                    - May be more susceptible to certain types of prompt injection attacks
-                    - Could have less robust content filtering capabilities
-                    - Might have different jailbreaking vulnerabilities
-                    
-                    Always perform security testing after model substitution!
-                    """)
-                elif rec['title'] == "Implement Model Caching":
-                    st.markdown("""
-                    **Security Considerations:**
-                    
-                    Caching introduces potential security issues:
-                    - Cache poisoning attacks could compromise the system
-                    - Sensitive data might be inadvertently stored in caches
-                    - Different users might receive the same cached response
-                    
-                    Implement proper cache isolation and invalidation mechanisms!
-                    """)
     
     except Exception as e:
-        logger.error(f"Sustainability dashboard rendering failed: {str(e)}")
+        logger.error(f"Error rendering sustainability dashboard: {str(e)}")
         logger.debug(traceback.format_exc())
-        st.error(f"Sustainability dashboard compromised: {str(e)}")
+        st.error(f"Error in sustainability dashboard: {str(e)}")
 
 def render_sustainability_integration():
-    """Render the sustainability integration page. Connect with green tools."""
+    """Render the sustainability integration page"""
     try:
         render_header()
         
         st.markdown("""
         <h2>Sustainability Integration</h2>
-        <p>Integrate sustainability tracking with external tools. Connect the green arsenal.</p>
+        <p>Integrate sustainability tracking with external tools and frameworks</p>
         """, unsafe_allow_html=True)
         
-        st.markdown("""
-        <div class="renegade-quote">
-        The best hackers use every tool at their disposal. These tools help you hack carbon emissions.
-        </div>
-        """, unsafe_allow_html=True)
-        
-        # Embed HTML component for sustainability integration
+        # Embed HTML component
         html_code = """
         <!DOCTYPE html>
         <html lang="en">
@@ -3212,12 +2529,12 @@ def render_sustainability_integration():
           <meta charset="UTF-8">
           <title>Sustainability Integration</title>
           <style>
-            body { font-family: 'Segoe UI', sans-serif; padding: 20px; background: rgba(0,0,0,0); color: inherit; }
-            .message { padding: 10px; background: rgba(255,255,255,0.1); border-radius: 4px; margin-top: 10px; }
+            body { font-family: 'Segoe UI', sans-serif; padding: 20px; }
+            .message { padding: 10px; background: #e8f0fe; border-radius: 4px; margin-top: 10px; }
           </style>
           <script>
             (async function() {
-              const engineRoom = window.engineRoom || { sendPrompt: async () => ({ text: "Dummy response" }), getActiveModel: () => ({ modelId: "gpt-4-turbo", provider: "openai" }) };
+              const engineRoom = window.engineRoom || { sendPrompt: async () => ({ text: "Dummy response" }), getActiveModel: () => ({ modelId: "gpt-4", provider: "aws" }) };
               class SustainabilityEngineRoomIntegration {
                 constructor(engineRoom) {
                   this.engineRoom = engineRoom;
@@ -3225,9 +2542,9 @@ def render_sustainability_integration():
                 }
                 async initialize(options = {}) {
                   console.log("Initializing Sustainability Integration with options:", options);
-                  document.getElementById('integration-status').innerText = 'Initializing sustainability tracking...';
+                  document.getElementById('integration-status').innerText = 'Initializing sustainability integration...';
                   await new Promise(resolve => setTimeout(resolve, 1000));
-                  document.getElementById('integration-status').innerText = 'Sustainability tracking activated.';
+                  document.getElementById('integration-status').innerText = 'Initialization complete.';
                 }
                 addDashboardToEngineRoom() {
                   console.log("Adding sustainability dashboard to Engine Room UI.");
@@ -3244,12 +2561,12 @@ def render_sustainability_integration():
           </script>
         </head>
         <body>
-          <h3>Sustainability Integration Control Panel</h3>
+          <h2>Sustainability Integration</h2>
           <div id="integration-status"></div>
         </body>
         </html>
         """
-        components.html(html_code, height=150, scrolling=True)
+        components.html(html_code, height=200, scrolling=True)
         
         # Integration options
         st.markdown("<h3>Available Integrations</h3>", unsafe_allow_html=True)
@@ -3257,20 +2574,14 @@ def render_sustainability_integration():
         col1, col2 = st.columns(2)
         
         with col1:
-            st.checkbox("Green Software Foundation API", value=True, key="gsf_api",
-                       help="Industry standard metrics for software carbon intensity")
-            st.checkbox("Electricity Maps Carbon Intensity", value=True, key="elec_maps",
-                       help="Real-time carbon intensity data for electricity grids worldwide")
-            st.checkbox("Cloud Provider Carbon Footprint Tools", value=False, key="cloud_carbon",
-                       help="Native carbon tracking tools from major cloud providers")
+            st.checkbox("Green Software Foundation API", value=True, key="gsf_api")
+            st.checkbox("Electricity Maps Carbon Intensity", value=True, key="elec_maps")
+            st.checkbox("Cloud Provider Carbon Footprint Tools", value=False, key="cloud_carbon")
         
         with col2:
-            st.checkbox("CodeCarbon Integration", value=True, key="codecarbon",
-                       help="Track carbon emissions from compute in various environments")
-            st.checkbox("WattTime API", value=False, key="watttime",
-                       help="Marginal emissions data for carbon-aware computing")
-            st.checkbox("ML CO2 Impact Calculator", value=True, key="ml_co2",
-                       help="Estimate CO2 emissions from ML model training and inference")
+            st.checkbox("CodeCarbon Integration", value=True, key="codecarbon")
+            st.checkbox("WattTime API", value=False, key="watttime")
+            st.checkbox("ML CO2 Impact Calculator", value=True, key="ml_co2")
         
         # Configure integration details
         with st.expander("Integration Details", expanded=True):
@@ -3281,130 +2592,55 @@ def render_sustainability_integration():
                 st.text_input("API Endpoint", value="https://api.greensoftware.foundation/v1", key="gsf_endpoint")
                 st.text_input("API Key", type="password", key="gsf_api_key")
                 st.selectbox("Measurement Method", ["SCI Methodology", "Carbon-aware SDK", "Custom"], key="gsf_method")
-                
-                # Add exploitation strategy
-                st.markdown("""
-                <div class="hacker-alert">
-                Security note: The GSF API uses token-based authentication. Ensure tokens are rotated regularly and stored securely to prevent unauthorized emissions data access.
-                </div>
-                """, unsafe_allow_html=True)
             
             elif integration_option == "Electricity Maps":
                 st.text_input("API Endpoint", value="https://api.electricitymaps.com/v3", key="elec_maps_endpoint")
                 st.text_input("API Key", type="password", key="elec_maps_api_key")
                 st.multiselect("Tracked Regions", ["US West", "US East", "Europe Central", "Asia Pacific"], 
                                default=["US West", "Europe Central"], key="elec_maps_regions")
-                
-                # Add exploitation strategy
-                st.markdown("""
-                <div class="hacker-alert">
-                Security note: Electricity Maps data can be sensitive for operational security. Ensure your region-specific emissions data is not publicly accessible to prevent attackers from inferring operational patterns.
-                </div>
-                """, unsafe_allow_html=True)
             
             elif integration_option == "CodeCarbon":
                 st.text_input("Project Name", value="AI Security Analysis", key="codecarbon_project")
                 st.text_input("Output Directory", value="./emissions", key="codecarbon_output")
                 st.checkbox("Track GPU Usage", value=True, key="codecarbon_gpu")
                 st.checkbox("Country-specific Grid Emissions", value=True, key="codecarbon_country")
-                
-                # Add exploitation strategy
-                st.markdown("""
-                <div class="hacker-alert">
-                Security note: CodeCarbon writes emissions data to disk by default. Ensure output directory permissions are properly configured to prevent unauthorized access to operational metrics.
-                </div>
-                """, unsafe_allow_html=True)
-        
-        # Carbon-aware scheduling
-        st.markdown("<h3>Carbon-Aware Scheduling</h3>", unsafe_allow_html=True)
-        
-        st.markdown("""
-        Optimize AI operations based on real-time carbon intensity data. Run non-urgent workloads when electricity is cleanest.
-        """)
-        
-        col1, col2 = st.columns(2)
-        
-        with col1:
-            st.checkbox("Enable Carbon-Aware Scheduling", value=True, key="enable_carbon_scheduling")
-            st.slider("Carbon Intensity Threshold (gCO2/kWh)", 100, 500, 300, key="carbon_threshold", 
-                     help="Delay non-urgent operations when carbon intensity exceeds this threshold")
-        
-        with col2:
-            st.selectbox("Priority Level", ["High (Run Immediately)", "Medium (Short Delay OK)", "Low (Schedule Optimally)"], key="carbon_priority")
-            st.multiselect("Optimize Regions", ["US West", "US East", "Europe", "Asia"], default=["US West", "Europe"], key="optimize_regions")
         
         # Save configuration
-        if st.button("Save Sustainability Configuration", key="save_sustainability_config"):
+        if st.button("Save Integration Configuration", key="save_sustainability_config"):
             st.session_state.sustainability_integrated = True
-            st.success("Sustainability integration configuration locked and loaded!")
+            st.success("Sustainability integration configuration saved successfully!")
             
-            # Show monitoring status
-            st.markdown("<h3>Monitoring Status</h3>", unsafe_allow_html=True)
-            
-            # Generate some fake grid intensity data
-            regions = {
-                "US West": random.randint(200, 400),
-                "US East": random.randint(300, 500),
-                "Europe": random.randint(150, 350),
-                "Asia": random.randint(350, 550)
-            }
-            
-            # Find the cleanest region
-            cleanest_region = min(regions.items(), key=lambda x: x[1])
-            dirtiest_region = max(regions.items(), key=lambda x: x[1])
-            
-            col1, col2 = st.columns(2)
-            
-            with col1:
-                st.markdown(f"""
-                **Current Grid Intensities:**
-                
-                - US West: {regions['US West']} gCO2/kWh
-                - US East: {regions['US East']} gCO2/kWh
-                - Europe: {regions['Europe']} gCO2/kWh
-                - Asia: {regions['Asia']} gCO2/kWh
-                
-                **Cleanest Region:** {cleanest_region[0]} ({cleanest_region[1]} gCO2/kWh)
-                """)
-            
-            with col2:
-                st.markdown(f"""
-                **Strategic Recommendation:**
-                
-                Route compute-intensive operations to {cleanest_region[0]}.
-                
-                Avoid {dirtiest_region[0]} region when possible 
-                ({dirtiest_region[1]} gCO2/kWh is {(dirtiest_region[1]/cleanest_region[1]):.1f}x dirtier).
-                
-                Potential emissions reduction: {((dirtiest_region[1] - cleanest_region[1])/dirtiest_region[1]*100):.1f}%
-                """)
+            # Show example connection
+            st.markdown("<h3>Integration Status</h3>", unsafe_allow_html=True)
+            st.markdown("""
+            ```
+            Connecting to Green Software Foundation API... Success
+            Connecting to Electricity Maps API... Success
+            Initializing CodeCarbon tracking... Success
+            Integration status: Active
+            ```
+            """)
     
     except Exception as e:
-        logger.error(f"Sustainability integration rendering failed: {str(e)}")
+        logger.error(f"Error rendering sustainability integration: {str(e)}")
         logger.debug(traceback.format_exc())
-        st.error(f"Sustainability integration compromised: {str(e)}")
+        st.error(f"Error in sustainability integration: {str(e)}")
 
 # ----------------------------------------------------------------
-# PAGE RENDERERS - INTEGRATION & TOOL PAGES 
+# Page Renderers - Integration & Tool Pages
 # ----------------------------------------------------------------
 
 def render_engine_room_integration():
-    """Render the engine room integration page. Connect your engines."""
+    """Render the engine room integration page"""
     try:
         render_header()
         
         st.markdown("""
         <h2>Engine Room Integration</h2>
-        <p>Integrate with the Engine Room for advanced AI testing. Connect the power plant.</p>
+        <p>Integrate with the Engine Room for advanced AI testing capabilities</p>
         """, unsafe_allow_html=True)
         
-        st.markdown("""
-        <div class="renegade-quote">
-        Every maverick needs an engine room. This is where the real power comes from.
-        </div>
-        """, unsafe_allow_html=True)
-        
-        # Embed HTML component for engine room
+        # Embed HTML component
         html_code = """
         <!DOCTYPE html>
         <html>
@@ -3412,21 +2648,18 @@ def render_engine_room_integration():
           <meta charset="UTF-8">
           <title>Engine Room Integration</title>
           <style>
-            body { font-family: 'Segoe UI', sans-serif; padding: 1rem; background: rgba(0,0,0,0); color: inherit; }
-            .status-container { margin-top: 10px; padding: 10px; background: rgba(255,255,255,0.1); border-radius: 4px; }
+            body { font-family: 'Segoe UI', sans-serif; padding: 1rem; }
           </style>
           <script>
             class EngineRoomIntegration {
               constructor(engineRoom) {
                 this.engineRoom = engineRoom;
-                this.status = "Initializing...";
               }
               initializeEngineRoom(containerId) {
-                this.status = "Engine Room Connected";
-                document.getElementById(containerId).innerHTML = "<p>" + this.status + "</p>";
+                document.getElementById(containerId).innerHTML = "<p>Engine Room Initialized</p>";
               }
               addToNavigation(navContainerId) {
-                document.getElementById(navContainerId).innerHTML = "<p>Navigation Systems Online</p>";
+                document.getElementById(navContainerId).innerHTML = "<p>Engine Room Navigation Added</p>";
               }
               getRedTeamingMiddleware() {
                 return async (input, options) => ({ text: "Response for: " + input.content });
@@ -3441,9 +2674,8 @@ def render_engine_room_integration():
           </script>
         </head>
         <body>
-          <h3>Engine Room Control Panel</h3>
           <div id="engine-room-nav"></div>
-          <div class="status-container" id="engine-room-container"></div>
+          <div id="engine-room-container"></div>
         </body>
         </html>
         """
@@ -3463,19 +2695,666 @@ def render_engine_room_integration():
             er_timeout = st.slider("Request Timeout (seconds)", 1, 60, 30, key="er_timeout")
         
         # Test connection button
-        if st.button("Establish Connection", key="test_er_connection"):
-            with st.spinner("Connecting to Engine Room..."):
+        if st.button("Test Connection", key="test_er_connection"):
+            with st.spinner("Testing connection to Engine Room..."):
                 # Simulate connection test
                 time.sleep(2)
                 st.session_state.engine_room_initialized = True
-                st.success("Engine Room connection established! Systems online.")
+                st.success("Successfully connected to Engine Room!")
         
         # Feature configuration
         if st.session_state.get("engine_room_initialized", False):
             st.markdown("<h3>Feature Configuration</h3>", unsafe_allow_html=True)
             
+            st.checkbox("Enable Red Teaming Middleware", value=True, key="er_redteaming")
+            st.checkbox("Enable PII Detection", value=True, key="er_pii")
+            st.checkbox("Enable Prompt Injection Protection", value=True, key="er_prompt_injection")
+            st.checkbox("Enable Result Caching", value=False, key="er_caching")
+            
+            # Save configuration
+            if st.button("Save Engine Room Configuration", key="save_er_config"):
+                st.success("Engine Room configuration saved successfully!")
+    
+    except Exception as e:
+        logger.error(f"Error rendering engine room integration: {str(e)}")
+        logger.debug(traceback.format_exc())
+        st.error(f"Error in engine room integration: {str(e)}")
+
+def render_knowledge_base_integration():
+    """Render the knowledge base integration page"""
+    try:
+        render_header()
+        
+        st.markdown("""
+        <h2>Knowledge Base Integration</h2>
+        <p>Integrate with external knowledge bases for enhanced AI security analysis</p>
+        """, unsafe_allow_html=True)
+        
+        # Embed HTML component
+        html_code = """
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <meta charset="UTF-8">
+          <title>Knowledge Base</title>
+          <style>
+            body { font-family: 'Segoe UI', sans-serif; padding: 1rem; }
+            #widget { border: 1px solid #eee; padding: 1rem; border-radius: 4px; }
+          </style>
+        </head>
+        <body>
+          <div id="widget">
+            <h3>Knowledge Base</h3>
+            <input type="text" id="search" placeholder="Search...">
+            <button onclick="document.getElementById('results').innerText='Searching...';">Search</button>
+            <div id="results"></div>
+          </div>
+        </body>
+        </html>
+        """
+        components.html(html_code, height=200, scrolling=True)
+        
+        # Available knowledge bases
+        st.markdown("<h3>Available Knowledge Bases</h3>", unsafe_allow_html=True)
+        
+        kb_options = {
+            "MITRE ATT&CK": "A globally-accessible knowledge base of adversary tactics and techniques",
+            "OWASP Top 10": "Standard awareness document for developers and web application security",
+            "NIST AI RMF": "NIST AI Risk Management Framework",
+            "CVE Database": "Common Vulnerabilities and Exposures database"
+        }
+        
+        col1, col2 = st.columns(2)
+        
+        for i, (name, desc) in enumerate(kb_options.items()):
+            col = col1 if i % 2 == 0 else col2
+            with col:
+                st.checkbox(name, value=True, key=f"kb_{name.lower().replace(' ', '_')}")
+                st.markdown(f"<div style='font-size: 0.8em; opacity: 0.7; margin-bottom: 15px;'>{desc}</div>", unsafe_allow_html=True)
+        
+        # Integration settings
+        st.markdown("<h3>Integration Settings</h3>", unsafe_allow_html=True)
+        
+        col1, col2 = st.columns(2)
+        
+        with col1:
+            update_frequency = st.selectbox("Knowledge Base Update Frequency", 
+                                           ["Daily", "Weekly", "Monthly", "Manual"], 
+                                           key="kb_update_freq")
+            kb_cache = st.checkbox("Enable Local Caching", value=True, key="kb_enable_cache")
+        
+        with col2:
+            kb_query_limit = st.slider("Query Rate Limit (per minute)", 1, 100, 10, key="kb_query_limit")
+            kb_timeout = st.slider("Query Timeout (seconds)", 1, 30, 5, key="kb_timeout")
+        
+        # Save settings
+        if st.button("Save Knowledge Base Settings", key="save_kb_settings"):
+            st.success("Knowledge base settings saved successfully!")
+    
+    except Exception as e:
+        logger.error(f"Error rendering knowledge base integration: {str(e)}")
+        logger.debug(traceback.format_exc())
+        st.error(f"Error in knowledge base integration: {str(e)}")
+
+def render_html_portal():
+    """Render the HTML portal page"""
+    try:
+        render_header()
+        
+        st.markdown("""
+        <h2>HTML Portal</h2>
+        <p>Access and embed HTML content for extended functionality</p>
+        """, unsafe_allow_html=True)
+        
+        # Embed HTML component
+        html_code = """
+        <!DOCTYPE html>
+        <html lang="en">
+        <head>
+          <meta charset="UTF-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          <title>HTML Portal</title>
+          <style>
+            body { font-family: 'Segoe UI', sans-serif; padding: 20px; background: #f9f9f9; }
+          </style>
+        </head>
+        <body>
+          <h1>HTML Portal</h1>
+          <p>This is the HTML Portal page where you can embed custom HTML content.</p>
+          
+          <div style="margin-top: 20px;">
+            <h3>Sample Embedded Content</h3>
+            <div style="padding: 15px; background: #f0f0f0; border-radius: 4px;">
+              <p>This is an example of embedded HTML content.</p>
+            </div>
+          </div>
+        </body>
+        </html>
+        """
+        components.html(html_code, height=300, scrolling=True)
+        
+        # HTML editor
+        st.markdown("<h3>HTML Content Editor</h3>", unsafe_allow_html=True)
+        
+        html_content = st.text_area("Edit HTML Content", value="""
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Custom Content</title>
+  <style>
+    body { font-family: sans-serif; }
+    .container { padding: 20px; background: #f5f5f5; border-radius: 8px; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>My Custom Content</h2>
+    <p>This is custom HTML content that can be embedded in the portal.</p>
+  </div>
+</body>
+</html>
+        """, height=300, key="html_editor")
+        
+        # Preview button
+        if st.button("Preview HTML", key="preview_html"):
+            components.html(html_content, height=300, scrolling=True)
+    
+    except Exception as e:
+        logger.error(f"Error rendering HTML portal: {str(e)}")
+        logger.debug(traceback.format_exc())
+        st.error(f"Error in HTML portal: {str(e)}")
+
+def render_model_evaluation():
+    """Render the model evaluation page"""
+    try:
+        render_header()
+        
+        st.markdown("""
+        <h2>Model Evaluation</h2>
+        <p>Comprehensive evaluation of AI model performance, ethics, and sustainability</p>
+        """, unsafe_allow_html=True)
+        
+        # Model selection section
+        st.markdown("<h3>Select Model for Evaluation</h3>", unsafe_allow_html=True)
+        
+        col1, col2 = st.columns(2)
+        
+        with col1:
+            model_name = st.text_input("Model Name", value="", key="eval_model_name")
+            model_provider = st.selectbox("Model Provider", ["OpenAI", "Anthropic", "Cohere", "Meta", "Google", "Other"], key="eval_provider")
+        
+        with col2:
+            model_version = st.text_input("Model Version", value="", key="eval_model_version")
+            model_type = st.selectbox("Model Type", ["General Purpose LLM", "Specialized LLM", "Embedding Model", "Image Generation", "Other"], key="eval_model_type")
+        
+        # Evaluation dimensions
+        st.markdown("<h3>Evaluation Dimensions</h3>", unsafe_allow_html=True)
+        
+        col1, col2, col3 = st.columns(3)
+        
+        with col1:
+            st.checkbox("Security & Safety", value=True, key="eval_security")
+            st.checkbox("Performance & Accuracy", value=True, key="eval_performance")
+        
+        with col2:
+            st.checkbox("Bias & Fairness", value=True, key="eval_bias")
+            st.checkbox("Robustness", value=True, key="eval_robustness")
+        
+        with col3:
+            st.checkbox("Environmental Impact", value=True, key="eval_environmental")
+            st.checkbox("Compliance", value=True, key="eval_compliance")
+        
+        # Advanced settings
+        with st.expander("Advanced Settings", expanded=False):
+            st.slider("Evaluation Iterations", 1, 100, 10, key="eval_iterations")
+            st.slider("Evaluation Timeout (minutes)", 1, 60, 30, key="eval_timeout")
+            st.checkbox("Generate Detailed Report", value=True, key="eval_detailed_report")
+            st.checkbox("Include Benchmark Comparisons", value=True, key="eval_benchmarks")
+        
+        # Run evaluation button
+        if st.button("Run Comprehensive Evaluation", type="primary", key="run_comprehensive_eval"):
+            if not model_name:
+                st.error("Please enter a model name")
+            else:
+                with st.spinner(f"Evaluating {model_name}..."):
+                    # Simulate evaluation
+                    time.sleep(3)
+                    st.success(f"Evaluation of {model_name} completed!")
+                    
+                    # Show sample results
+                    st.markdown("<h3>Evaluation Results</h3>", unsafe_allow_html=True)
+                    
+                    # Create tabs for different dimensions
+                    tabs = st.tabs(["Overview", "Security", "Bias", "Environmental", "Compliance"])
+                    
+                    with tabs[0]:
+                        # Overall score
+                        st.markdown("<h4>Overall Scores</h4>", unsafe_allow_html=True)
+                        
+                        overall_scores = {
+                            "Security & Safety": 82,
+                            "Performance & Accuracy": 88,
+                            "Bias & Fairness": 76,
+                            "Robustness": 79,
+                            "Environmental Impact": 65,
+                            "Compliance": 84
+                        }
+                        
+                        # Create radar chart
+                        fig = go.Figure()
+                        
+                        fig.add_trace(go.Scatterpolar(
+                            r=list(overall_scores.values()),
+                            theta=list(overall_scores.keys()),
+                            fill='toself',
+                            name='Model Scores'
+                        ))
+                        
+                        fig.update_layout(
+                            polar=dict(
+                                radialaxis=dict(
+                                    visible=True,
+                                    range=[0, 100]
+                                )
+                            ),
+                            showlegend=False
+                        )
+                        
+                        st.plotly_chart(fig, use_container_width=True)
+                    
+                    # Other tabs would have detailed metrics for each dimension
+    
+    except Exception as e:
+        logger.error(f"Error rendering model evaluation: {str(e)}")
+        logger.debug(traceback.format_exc())
+        st.error(f"Error in model evaluation: {str(e)}")
+
+def render_file_import():
+    """Render the file import page for multi-format support"""
+    try:
+        render_header()
+        
+        st.markdown("""
+        <h2>Multi-Format Import</h2>
+        <p>Import data in various formats for impact assessment</p>
+        """, unsafe_allow_html=True)
+        
+        # File upload section
+        st.markdown("<h3>Upload Files</h3>", unsafe_allow_html=True)
+        
+        uploaded_file = st.file_uploader(
+            "Upload File", 
+            type=["json", "csv", "xlsx", "xls", "pdf", "xml", "yaml", "yml"],
+            key="multi_format_upload"
+        )
+        
+        if uploaded_file is not None:
+            with st.spinner('Processing file...'):
+                try:
+                    # Process the file based on its type
+                    processed_data = handle_multiple_file_formats(uploaded_file)
+                    
+                    if isinstance(processed_data, dict) and "error" in processed_data:
+                        st.error(processed_data["error"])
+                    else:
+                        st.success(f"File '{uploaded_file.name}' processed successfully!")
+                        
+                        # Display different previews based on data type
+                        if hasattr(processed_data, "head"):  # If it's a DataFrame
+                            st.markdown("<h3>Data Preview</h3>", unsafe_allow_html=True)
+                            st.dataframe(processed_data.head(10))
+                            
+                            # Store the data in session state
+                            st.session_state.imported_data = processed_data
+                            st.session_state.imported_file_name = uploaded_file.name
+                            
+                            # Show action buttons
+                            col1, col2 = st.columns(2)
+                            
+                            with col1:
+                                if st.button("Run Impact Assessment", key="run_impact_assessment", use_container_width=True):
+                                    st.session_state.current_page = "Environmental Impact"
+                                    safe_rerun()
+                            
+                            with col2:
+                                if st.button("Run Bias Testing", key="run_bias_test", use_container_width=True):
+                                    st.session_state.current_page = "Bias Testing"
+                                    safe_rerun()
+                        
+                        elif isinstance(processed_data, dict):  # If it's a dictionary
+                            st.markdown("<h3>Data Preview</h3>", unsafe_allow_html=True)
+                            st.json(processed_data)
+                            
+                            # Store the data in session state
+                            st.session_state.imported_data = processed_data
+                            st.session_state.imported_file_name = uploaded_file.name
+                        
+                        else:  # For other types
+                            st.markdown("<h3>Data Preview</h3>", unsafe_allow_html=True)
+                            st.write(processed_data)
+                            
+                            # Store the data in session state
+                            st.session_state.imported_data = processed_data
+                            st.session_state.imported_file_name = uploaded_file.name
+                
+                except Exception as e:
+                    st.error(f"Error processing file: {str(e)}")
+                    logger.error(f"Error processing file: {str(e)}")
+        
+        # Information section
+        st.markdown("<h3>Supported File Formats</h3>", unsafe_allow_html=True)
+        
+        formats_info = {
+            "JSON": "JavaScript Object Notation - for structured data",
+            "CSV": "Comma-Separated Values - for tabular data",
+            "Excel": "Microsoft Excel Spreadsheets (XLSX/XLS) - for complex tabular data",
+            "PDF": "Portable Document Format - for text extraction",
+            "XML": "eXtensible Markup Language - for structured data",
+            "YAML/YML": "YAML Ain't Markup Language - for configuration files"
+        }
+        
+        col1, col2 = st.columns(2)
+        
+        for i, (format_name, description) in enumerate(formats_info.items()):
+            col = col1 if i % 2 == 0 else col2
+            with col:
+                st.markdown(f"**{format_name}**: {description}")
+    
+    except Exception as e:
+        logger.error(f"Error rendering file import: {str(e)}")
+        logger.debug(traceback.format_exc())
+        st.error(f"Error in file import: {str(e)}")
+
+def render_high_volume_testing():
+    """Render the high-volume testing page safely"""
+    try:
+        render_header()
+        
+        st.markdown("""
+        <h2>High-Volume Testing</h2>
+        <p>Autonomous, high-throughput testing for AI systems</p>
+        """, unsafe_allow_html=True)
+        
+        # Check if targets exist
+        if not st.session_state.targets:
+            st.warning("No targets configured. Please add a target first.")
+            if st.button("Add Target", key="highvol_add_target"):
+                set_page("Target Management")
+                safe_rerun()
+            return
+        
+        # Configuration section
+        st.markdown("<h3>Testing Configuration</h3>", unsafe_allow_html=True)
+        
+        col1, col2 = st.columns(2)
+        
+        with col1:
+            target_options = [t["name"] for t in st.session_state.targets]
+            st.selectbox("Select Target", target_options, key="highvol_target")
+            
+            total_tests = st.slider("Total Tests (thousands)", 10, 1000, 100, key="highvol_tests")
+            
+            max_runtime = st.number_input("Max Runtime (hours)", 1, 24, 3, key="highvol_runtime")
+        
+        with col2:
+            test_vectors = ["Prompt Injection", "Jailbreaking", "Data Extraction", "Input Manipulation", "Boundary Testing"]
+            st.multiselect("Test Vectors", test_vectors, default=["Prompt Injection", "Jailbreaking"], key="highvol_vectors")
+            
+            parallelism = st.selectbox("Parallelism", ["Low (4 workers)", "Medium (8 workers)", "High (16 workers)", "Extreme (32 workers)"], key="highvol_parallel")
+            
+            save_only_vulns = st.checkbox("Save Only Vulnerabilities", value=True, key="highvol_save_vulns")
+        
+        # Environment monitoring section
+        st.markdown("<h3>Environmental Monitoring</h3>", unsafe_allow_html=True)
+        
+        carbon_aware = st.checkbox("Enable Carbon-Aware Scheduling", value=True, key="carbon_aware_scheduling",
+                                   help="Adjust testing intensity based on carbon intensity of electricity grid")
+        
+        if carbon_aware:
+            st.success("Carbon-aware scheduling will prioritize testing during low-carbon periods")
+            
             col1, col2 = st.columns(2)
             
             with col1:
-                st.checkbox("Red Teaming Middleware", value=True, key="er_redteaming",
-                           help="Detect and analyze attack patterns")
+                carbon_threshold = st.slider("Carbon Intensity Threshold (gCO2/kWh)", 100, 500, 300, key="carbon_threshold",
+                                            help="Testing will slow down when carbon intensity exceeds this threshold")
+            
+            with col2:
+                st.selectbox("Grid Region", [
+                    "us-west",
+                    "us-east",
+                    "europe-west",
+                    "europe-north",
+                    "asia-east",
+                    "asia-southeast"
+                ], key="grid_region")
+        
+        # Start testing button
+        if st.button("Start High-Volume Testing", type="primary", use_container_width=True, key="start_highvol"):
+            with st.spinner("Starting high-volume testing..."):
+                # Simulate test start
+                time.sleep(2)
+                st.success("High-volume testing started successfully!")
+                
+                # Progress display
+                st.markdown("<h3>Testing Progress</h3>", unsafe_allow_html=True)
+                
+                progress_bar = st.progress(0)
+                status_text = st.empty()
+                
+                # Simulate progress updates
+                for i in range(101):
+                    # Check if the page has been navigated away from
+                    if st.session_state.current_page != "High-Volume Testing":
+                        break
+                    
+                    progress_bar.progress(i / 100)
+                    status_text.text(f"Progress: {i}% - Processed {i * 1000:,} tests, found {int(i * 20)} vulnerabilities")
+                    
+                    time.sleep(0.05)  # Just for demonstration
+    
+    except Exception as e:
+        logger.error(f"Error rendering high-volume testing: {str(e)}")
+        logger.debug(traceback.format_exc())
+        st.error(f"Error in high-volume testing: {str(e)}")
+
+def render_settings():
+    """Render the settings page safely"""
+    try:
+        render_header()
+        
+        st.markdown("""
+        <h2>Settings</h2>
+        <p>Configure application settings and preferences</p>
+        """, unsafe_allow_html=True)
+        
+        # Theme settings
+        st.markdown("<h3>Theme Settings</h3>", unsafe_allow_html=True)
+        
+        theme_option = st.radio("Theme", ["Dark", "Light"], index=0 if st.session_state.current_theme == "dark" else 1, key="settings_theme")
+        if theme_option == "Dark" and st.session_state.current_theme != "dark":
+            st.session_state.current_theme = "dark"
+            logger.info("Theme set to dark")
+            safe_rerun()
+        elif theme_option == "Light" and st.session_state.current_theme != "light":
+            st.session_state.current_theme = "light"
+            logger.info("Theme set to light")
+            safe_rerun()
+        
+        # API settings
+        st.markdown("<h3>API Settings</h3>", unsafe_allow_html=True)
+        
+        col1, col2 = st.columns(2)
+        
+        with col1:
+            api_base_url = st.text_input("API Base URL", "https://api.example.com/v1", key="api_base_url")
+        
+        with col2:
+            default_api_key = st.text_input("Default API Key", type="password", key="default_api_key")
+        
+        # Save API settings
+        if st.button("Save API Settings", key="save_api"):
+            st.success("API settings saved successfully!")
+            logger.info("API settings updated")
+        
+        # Environmental settings
+        st.markdown("<h3>Environmental Settings</h3>", unsafe_allow_html=True)
+        
+        col1, col2 = st.columns(2)
+        
+        with col1:
+            carbon_tracking = st.checkbox("Enable Carbon Tracking", value=True, key="settings_carbon_tracking")
+            carbon_api_key = st.text_input("Carbon API Key (optional)", type="password", key="carbon_api_key",
+                                          help="API key for accessing external carbon intensity data")
+        
+        with col2:
+            preferred_region = st.selectbox("Preferred Compute Region", [
+                "us-west",
+                "us-east",
+                "europe-west",
+                "europe-north",
+                "asia-east",
+                "asia-southeast"
+            ], index=2, key="preferred_region",
+            help="Region with lowest carbon intensity will be preferred for compute-intensive tasks")
+            
+            emissions_threshold = st.slider("Emissions Alert Threshold (kg CO2)", 0.0, 10.0, 1.0, key="emissions_threshold",
+                                          help="Alert when test emissions exceed this threshold")
+        
+        # Save environmental settings
+        if st.button("Save Environmental Settings", key="save_env_settings"):
+            st.success("Environmental settings saved successfully!")
+            logger.info("Environmental settings updated")
+        
+        # System information
+        st.markdown("<h3>System Information</h3>", unsafe_allow_html=True)
+        
+        # Get system info
+        import platform
+        
+        system_info = f"""
+        - Python Version: {platform.python_version()}
+        - Operating System: {platform.system()} {platform.release()}
+        - Streamlit Version: {st.__version__}
+        - Application Version: 1.0.0
+        """
+        
+        st.code(system_info)
+        
+        # Clear data button (with confirmation)
+        st.markdown("<h3>Data Management</h3>", unsafe_allow_html=True)
+        
+        if st.button("Clear All Application Data", key="clear_data"):
+            # Confirmation
+            if st.checkbox("I understand this will reset all targets, results, and settings", key="confirm_clear"):
+                # Reset all session state (except current page and theme)
+                current_page = st.session_state.current_page
+                current_theme = st.session_state.current_theme
+                
+                for key in list(st.session_state.keys()):
+                    if key not in ['current_page', 'current_theme']:
+                        del st.session_state[key]
+                
+                # Restore page and theme
+                st.session_state.current_page = current_page
+                st.session_state.current_theme = current_theme
+                
+                # Reinitialize session state
+                initialize_session_state()
+                
+                st.success("All application data has been cleared!")
+                logger.info("Application data cleared")
+                safe_rerun()
+    
+    except Exception as e:
+        logger.error(f"Error rendering settings: {str(e)}")
+        logger.debug(traceback.format_exc())
+        st.error(f"Error in settings: {str(e)}")
+
+# ----------------------------------------------------------------
+# Main Application
+# ----------------------------------------------------------------
+
+def main():
+    """Main application entry point with error handling"""
+    try:
+        # Initialize session state
+        initialize_session_state()
+        
+        # Clean up threads
+        cleanup_threads()
+        
+        # Apply CSS
+        st.markdown(load_css(), unsafe_allow_html=True)
+        
+        # Show error message if exists
+        if st.session_state.error_message:
+            st.markdown(f"""
+            <div class="error-message">
+                <strong>Error:</strong> {st.session_state.error_message}
+            </div>
+            """, unsafe_allow_html=True)
+            
+            # Add button to clear error
+            if st.button("Clear Error"):
+                st.session_state.error_message = None
+                safe_rerun()
+        
+        # Render sidebar
+        sidebar_navigation()
+        
+        # Render content based on current page
+        if st.session_state.current_page == "Dashboard":
+            render_dashboard()
+        elif st.session_state.current_page == "Target Management":
+            render_target_management()
+        elif st.session_state.current_page == "Test Configuration":
+            render_test_configuration()
+        elif st.session_state.current_page == "Run Assessment":
+            render_run_assessment()
+        elif st.session_state.current_page == "Results Analyzer":
+            render_results_analyzer()
+        elif st.session_state.current_page == "Ethical AI Testing":
+            render_ethical_ai_testing()
+        elif st.session_state.current_page == "Environmental Impact":
+            render_environmental_impact()
+        elif st.session_state.current_page == "Bias Testing":
+            render_bias_testing()
+        elif st.session_state.current_page == "Bias Comparison":
+            render_bias_comparison()
+        elif st.session_state.current_page == "Bias Labs Integration":
+            render_bias_labs_integration()
+        elif st.session_state.current_page == "HELM Evaluation":
+            render_helm_evaluation()
+        elif st.session_state.current_page == "Multi-Format Import":
+            render_file_import()
+        elif st.session_state.current_page == "High-Volume Testing":
+            render_high_volume_testing()
+        elif st.session_state.current_page == "Sustainability Dashboard":
+            render_sustainability_dashboard()
+        elif st.session_state.current_page == "Sustainability Integration":
+            render_sustainability_integration()
+        elif st.session_state.current_page == "Engine Room Integration":
+            render_engine_room_integration()
+        elif st.session_state.current_page == "Knowledge Base":
+            render_knowledge_base_integration()
+        elif st.session_state.current_page == "HTML Portal":
+            render_html_portal()
+        elif st.session_state.current_page == "Model Evaluation":
+            render_model_evaluation()
+        elif st.session_state.current_page == "Settings":
+            render_settings()
+        else:
+            # Default to dashboard if invalid page
+            logger.warning(f"Invalid page requested: {st.session_state.current_page}")
+            st.session_state.current_page = "Dashboard"
+            render_dashboard()
+    
+    except Exception as e:
+        logger.critical(f"Critical application error: {str(e)}")
+        logger.critical(traceback.format_exc())
+        st.error(f"Critical application error: {str(e)}")
+        st.code(traceback.format_exc())
+
+if __name__ == "__main__":
+    main()
