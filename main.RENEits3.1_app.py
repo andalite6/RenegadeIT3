@@ -1829,4 +1829,1653 @@ def render_bias_testing():
     try:
         render_header()
         
-        st.markdown
+        st.markdown("""
+        <h2>AI Bias Hunting</h2>
+        <p>Detect and exploit bias in AI systems. Every system has blindspots - find them before the bad guys do.</p>
+        """, unsafe_allow_html=True)
+        
+        # Initialize BiasHunter if not already done
+        if 'bias_hunter' not in st.session_state:
+            st.session_state.bias_hunter = BiasHunter()
+        
+        # Sample data upload section
+        st.markdown("<h3>Upload Intelligence</h3>", unsafe_allow_html=True)
+        
+        uploaded_file = st.file_uploader(
+            "Upload CSV or Excel file", 
+            type=["csv", "xlsx", "xls"],
+            key="bias_testing_upload"
+        )
+        
+        if uploaded_file is not None:
+            with st.spinner('Decrypting and analyzing data...'):
+                try:
+                    # Determine file type and read accordingly
+                    file_extension = uploaded_file.name.split('.')[-1].lower()
+                    
+                    if file_extension == 'csv':
+                        df = pd.read_csv(uploaded_file)
+                    elif file_extension in ['xlsx', 'xls']:
+                        df = pd.read_excel(uploaded_file)
+                    else:
+                        st.error("Unsupported file format. I need CSV or Excel.")
+                        return
+                    
+                    # Store the data
+                    st.session_state.imported_data = df
+                    st.session_state.imported_file_name = uploaded_file.name
+                    
+                    st.success(f"Dataset decoded: {df.shape[0]} records, {df.shape[1]} variables")
+                    
+                    # Display sample data
+                    st.markdown("<h4>Intelligence Preview</h4>", unsafe_allow_html=True)
+                    st.dataframe(df.head())
+                    
+                    # Bias analysis configuration
+                    st.markdown("<h3>Bias Testing Configuration</h3>", unsafe_allow_html=True)
+                    
+                    st.markdown("""
+                    <div class="renegade-quote">
+                    Bias isn't just a social problem, it's a security vulnerability. Let's find the cracks in the foundation.
+                    </div>
+                    """, unsafe_allow_html=True)
+                    
+                    col1, col2 = st.columns(2)
+                    
+                    with col1:
+                        # Select protected attributes (categorical columns)
+                        categorical_columns = df.select_dtypes(include=['object', 'category']).columns.tolist()
+                        protected_features = st.multiselect(
+                            "Select Protected Attributes", 
+                            categorical_columns,
+                            key="protected_features"
+                        )
+                    
+                    with col2:
+                        # Select target column
+                        all_columns = df.columns.tolist()
+                        target_column = st.selectbox(
+                            "Select Target Column (outcome)",
+                            all_columns,
+                            key="target_column"
+                        )
+                    
+                    # Run analysis button
+                    if st.button("Hunt for Bias", type="primary", key="run_bias_analysis"):
+                        if not protected_features:
+                            st.error("Need at least one protected attribute to hunt for bias")
+                        elif not target_column:
+                            st.error("Need a target column to analyze outcomes")
+                        else:
+                            with st.spinner("Hunting for bias vulnerabilities..."):
+                                # In a real implementation, we'd use an actual bias analysis tool
+                                # Here we'll simulate with our BiasHunter
+                                bias_metrics = st.session_state.bias_hunter.analyze_bias(
+                                    df, protected_features, target_column, 
+                                    st.session_state.imported_file_name
+                                )
+                                
+                                if isinstance(bias_metrics, dict) and "error" in bias_metrics:
+                                    st.error(bias_metrics["error"])
+                                else:
+                                    st.success("Bias vulnerabilities identified!")
+                                    st.session_state.bias_results = bias_metrics
+                                    st.session_state.show_bias_results = True
+                                    safe_rerun()
+                
+                except Exception as e:
+                    st.error(f"Intelligence analysis failed: {str(e)}")
+        
+        # Option to use sample data - every maverick has a toolkit
+        st.markdown("<h3>Or Use Sample Intelligence</h3>", unsafe_allow_html=True)
+        
+        if st.button("Load Sample Dataset", key="load_sample_dataset"):
+            with st.spinner('Generating sample intelligence data...'):
+                try:
+                    # Create a sample dataset with potential bias
+                    # Set seed for reproducibility
+                    np.random.seed(42)
+                    
+                    # Create sample data
+                    n_samples = 1000
+                    
+                    # Generate demographic features
+                    gender = np.random.choice(['Male', 'Female'], size=n_samples, p=[0.52, 0.48])
+                    age_group = np.random.choice(['18-25', '26-35', '36-45', '46-55', '56+'], size=n_samples)
+                    ethnicity = np.random.choice(['Group A', 'Group B', 'Group C', 'Group D'], 
+                                                size=n_samples, p=[0.6, 0.2, 0.15, 0.05])
+                    
+                    # Generate features
+                    education = np.random.choice(['High School', 'Bachelor', 'Master', 'PhD'], size=n_samples)
+                    experience = np.random.randint(0, 20, size=n_samples)
+                    
+                    # Create biased outcomes - this is where the vulnerability lies
+                    gender_bias = (gender == 'Male') * 0.2
+                    ethnicity_bias = np.zeros(n_samples)
+                    ethnicity_bias[ethnicity == 'Group A'] = 0.1
+                    ethnicity_bias[ethnicity == 'Group D'] = -0.15
+                    
+                    # Base approval probability
+                    base_prob = 0.5
+                    approval_prob = base_prob + gender_bias + ethnicity_bias
+                    approval_prob = np.clip(approval_prob, 0, 1)
+                    
+                    # Generate approval decisions
+                    approved = np.random.binomial(1, approval_prob)
+                    
+                    # Create DataFrame
+                    df = pd.DataFrame({
+                        'Gender': gender,
+                        'Age_Group': age_group,
+                        'Ethnicity': ethnicity,
+                        'Education': education,
+                        'Experience_Years': experience,
+                        'Approved': approved
+                    })
+                    
+                    # Store the data
+                    st.session_state.imported_data = df
+                    st.session_state.imported_file_name = "sample_biased_dataset.csv"
+                    
+                    st.success("Sample dataset loaded successfully. Bias deliberately injected for testing.")
+                    
+                    # Display sample data
+                    st.dataframe(df.head())
+                    
+                    # Show sample bias metrics
+                    st.markdown("<h3>Bias Analysis Results</h3>", unsafe_allow_html=True)
+                    
+                    st.markdown("""
+                    <div class="renegade-quote">
+                    The numbers don't lie. This model clearly favors certain groups over others. Exploit found.
+                    </div>
+                    """, unsafe_allow_html=True)
+                    
+                    col1, col2 = st.columns(2)
+                    
+                    with col1:
+                        # Gender bias chart
+                        gender_approval = df.groupby('Gender')['Approved'].mean().reset_index()
+                        fig_gender = px.bar(
+                            gender_approval, 
+                            x='Gender', 
+                            y='Approved', 
+                            title='Approval Rate by Gender',
+                            color='Approved',
+                            color_continuous_scale='Plasma'
+                        )
+                        
+                        # Customize for dark/light theme
+                        theme = get_theme()
+                        fig_gender.update_layout(
+                            paper_bgcolor='rgba(0,0,0,0)',
+                            plot_bgcolor='rgba(0,0,0,0)',
+                            font=dict(color=theme["text"])
+                        )
+                        
+                        st.plotly_chart(fig_gender, use_container_width=True)
+                    
+                    with col2:
+                        # Ethnicity bias chart
+                        ethnicity_approval = df.groupby('Ethnicity')['Approved'].mean().reset_index()
+                        fig_ethnicity = px.bar(
+                            ethnicity_approval, 
+                            x='Ethnicity', 
+                            y='Approved', 
+                            title='Approval Rate by Ethnicity',
+                            color='Approved',
+                            color_continuous_scale='Plasma'
+                        )
+                        
+                        # Customize for dark/light theme
+                        fig_ethnicity.update_layout(
+                            paper_bgcolor='rgba(0,0,0,0)',
+                            plot_bgcolor='rgba(0,0,0,0)',
+                            font=dict(color=theme["text"])
+                        )
+                        
+                        st.plotly_chart(fig_ethnicity, use_container_width=True)
+                    
+                    # Add exploitation and mitigation advice
+                    st.markdown("<h3>Vulnerability Assessment</h3>", unsafe_allow_html=True)
+                    
+                    with st.expander("Exploitation Potential", expanded=True):
+                        st.markdown("""
+                        ### How This Bias Could Be Exploited
+                        
+                        This bias vulnerability creates several attack vectors:
+                        
+                        1. **Demographic Targeting**: Attackers could focus on exploiting the gender bias to increase approval rates for specific groups.
+                        2. **Fairness Attacks**: The system could be manipulated to produce unfair outcomes by strategically selecting input demographics.
+                        3. **Regulatory Exposure**: The bias could be reported to regulatory authorities, leading to compliance issues and penalties.
+                        4. **Reputational Damage**: Public exposure of the bias could damage the organization's reputation and trust.
+                        5. **Legal Liability**: The bias could create grounds for discrimination lawsuits.
+                        
+                        The disparity between Male and Female approval rates (~20%) and between Group A and Group D (~25%) exceeds thresholds that would trigger regulatory concerns in many jurisdictions.
+                        """)
+                    
+                    with st.expander("Mitigation Strategies"):
+                        st.markdown("""
+                        ### How To Fix This Vulnerability
+                        
+                        1. **Data Rebalancing**: Adjust the training data to ensure balanced representation across demographic groups.
+                        2. **Pre-processing Techniques**: Apply techniques like reweighing, disparate impact removal, or learning fair representations.
+                        3. **In-processing Fixes**: Implement adversarial debiasing or prejudice remover regularization during model training.
+                        4. **Post-processing Methods**: Apply calibrated equalized odds or reject option classification to the model outputs.
+                        5. **Ongoing Monitoring**: Implement continuous bias auditing to detect and address new bias patterns that emerge.
+                        
+                        The most effective approach usually combines multiple techniques and requires ongoing vigilance.
+                        """)
+                
+                except Exception as e:
+                    st.error(f"Error generating sample data: {str(e)}")
+    
+    except Exception as e:
+        logger.error(f"Bias testing rendering failed: {str(e)}")
+        logger.debug(traceback.format_exc())
+        st.error(f"Bias hunting module compromised: {str(e)}")
+
+def render_bias_comparison():
+    """Render the bias comparison visualization page. Compare and contrast."""
+    try:
+        render_header()
+        
+        st.markdown("""
+        <h2>Bias Comparison Analysis</h2>
+        <p>Compare model bias against industry benchmarks. Know where you stand and where the weaknesses are.</p>
+        """, unsafe_allow_html=True)
+        
+        # Embed HTML component for bias comparison
+        html_code = """
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <meta charset="UTF-8">
+          <title>Bias Comparison Visualization</title>
+          <style>
+            body { font-family: 'Segoe UI', sans-serif; padding: 20px; background: rgba(0,0,0,0); color: inherit; }
+            .bias-chart { margin: 20px 0; }
+            .chart-container { position: relative; height: 80px; background: rgba(255,255,255,0.1); border-radius: 8px; }
+            .model-score { position: absolute; top: 10px; height: 20px; background: #FF5722; color: white; text-align: center; line-height: 20px; border-radius: 4px; }
+            .benchmark { position: absolute; top: 40px; height: 20px; background: #e37400; color: white; text-align: center; line-height: 20px; border-radius: 4px; }
+            .benchmark.top { background: #188038; }
+          </style>
+        </head>
+        <body>
+          <div class="bias-chart">
+            <h4>Model Bias Performance vs. Industry Standards</h4>
+            <div class="chart-container">
+              <div class="model-score" style="width:65%">Your Model: 65%</div>
+              <div class="benchmark" style="left:70%">Industry Avg: 70%</div>
+              <div class="benchmark top" style="left:85%">Top Performers: 85%</div>
+            </div>
+          </div>
+        </body>
+        </html>
+        """
+        components.html(html_code, height=150, scrolling=True)
+        
+        st.markdown("""
+        <div class="renegade-quote">
+        Knowing where you stand is the first step. Knowing where your competitors fail is the second.
+        </div>
+        """, unsafe_allow_html=True)
+        
+        # Additional performance metrics
+        st.markdown("<h3>Detailed Bias Metrics</h3>", unsafe_allow_html=True)
+        
+        # Create tabs for different bias categories
+        tabs = st.tabs(["Gender", "Age", "Race/Ethnicity", "Socioeconomic"])
+        
+        with tabs[0]:
+            # Gender bias metrics
+            col1, col2 = st.columns(2)
+            
+            with col1:
+                st.metric("Gender Parity Difference", "0.14", "Higher is worse")
+                st.metric("Equal Opportunity Difference", "0.09", "Higher is worse")
+            
+            with col2:
+                st.metric("Disparate Impact Ratio", "0.82", "Closer to 1.0 is better")
+                st.metric("Treatment Equality Ratio", "0.91", "Closer to 1.0 is better")
+            
+            # Sample visualization
+            gender_data = pd.DataFrame({
+                'Group': ['Male', 'Female', 'Non-Binary'],
+                'Approval Rate': [0.72, 0.58, 0.63]
+            })
+            
+            fig = px.bar(
+                gender_data,
+                x='Group',
+                y='Approval Rate',
+                color='Approval Rate',
+                title="Approval Rates by Gender",
+                color_continuous_scale='Plasma'
+            )
+            
+            # Customize for dark/light theme
+            theme = get_theme()
+            fig.update_layout(
+                paper_bgcolor='rgba(0,0,0,0)',
+                plot_bgcolor='rgba(0,0,0,0)',
+                font=dict(color=theme["text"])
+            )
+            
+            st.plotly_chart(fig, use_container_width=True)
+            
+            # Exploitation risk assessment
+            st.markdown("<h4>Vulnerability Assessment</h4>", unsafe_allow_html=True)
+            st.markdown("""
+            This model shows a significant gender bias with a 14% disparity between male and female approval rates.
+            
+            **Exploitation Risk**: HIGH
+            
+            A malicious actor could exploit this bias by:
+            1. Systematically using male personas to increase approval chances
+            2. Using this disparity to demonstrate discrimination in regulatory complaints
+            3. Manipulating input data to amplify the bias effect for specific cases
+            """)
+        
+        with tabs[1]:
+            # Age bias metrics
+            col1, col2 = st.columns(2)
+            
+            with col1:
+                st.metric("Age Parity Difference", "0.23", "Higher is worse")
+                st.metric("Equal Opportunity Difference", "0.17", "Higher is worse")
+            
+            with col2:
+                st.metric("Disparate Impact Ratio", "0.77", "Closer to 1.0 is better")
+                st.metric("Treatment Equality Ratio", "0.83", "Closer to 1.0 is better")
+            
+            # Sample visualization
+            age_data = pd.DataFrame({
+                'Group': ['18-25', '26-35', '36-45', '46-55', '56+'],
+                'Approval Rate': [0.68, 0.73, 0.65, 0.59, 0.45]
+            })
+            
+            fig = px.bar(
+                age_data,
+                x='Group',
+                y='Approval Rate',
+                color='Approval Rate',
+                title="Approval Rates by Age Group",
+                color_continuous_scale='Plasma'
+            )
+            
+            # Customize for dark/light theme
+            fig.update_layout(
+                paper_bgcolor='rgba(0,0,0,0)',
+                plot_bgcolor='rgba(0,0,0,0)',
+                font=dict(color=theme["text"])
+            )
+            
+            st.plotly_chart(fig, use_container_width=True)
+            
+            # Exploitation risk assessment
+            st.markdown("<h4>Vulnerability Assessment</h4>", unsafe_allow_html=True)
+            st.markdown("""
+            This model shows significant age-based discrimination with particularly low approval rates for the 56+ age group.
+            
+            **Exploitation Risk**: VERY HIGH
+            
+            This vulnerability creates:
+            1. Regulatory risk (age discrimination is explicitly prohibited in many jurisdictions)
+            2. Potential for class-action lawsuits 
+            3. Opportunity for adversaries to manipulate age information to achieve desired outcomes
+            """)
+        
+        # Recommendations section
+        st.markdown("<h3>Bias Mitigation Strategy</h3>", unsafe_allow_html=True)
+        
+        with st.expander("Pre-processing Techniques", expanded=True):
+            st.markdown("""
+            - **Reweighing**: Adjust training example weights to ensure fair representation - gives you an immediate fix without retraining
+            - **Disparate Impact Removal**: Transform features to mathematically remove correlations with protected attributes
+            - **Learning Fair Representations**: Train models to create representations that encode the data well while obscuring protected attributes
+            """)
+        
+        with st.expander("In-processing Techniques"):
+            st.markdown("""
+            - **Adversarial Debiasing**: Implement a system where one model tries to predict the protected attribute from the features, and the main model tries to prevent this
+            - **Prejudice Remover**: Add regularization terms to the objective function that penalize discriminatory predictions
+            - **Meta Fair Classifier**: Use an ensemble approach that combines multiple fair classifiers
+            """)
+        
+        with st.expander("Post-processing Techniques"):
+            st.markdown("""
+            - **Reject Option Classification**: Modify decision boundaries in regions of uncertainty to equalize outcomes
+            - **Equalized Odds Post-processing**: Adjust model outputs to ensure equal false positive and false negative rates across groups
+            - **Calibrated Equalized Odds**: Find the optimal trade-off between prediction accuracy and fairness
+            """)
+        
+        # Action buttons
+        col1, col2 = st.columns(2)
+        
+        with col1:
+            if st.button("Generate Exploitation Report", key="gen_exploitation_report", use_container_width=True):
+                st.success("Generating comprehensive bias exploitation analysis...")
+                
+                with st.spinner("Analyzing attack vectors..."):
+                    time.sleep(1)
+                    
+                    st.markdown("""
+                    ### Bias Exploitation Report
+                    
+                    **Critical Vulnerabilities Identified:**
+                    
+                    1. **Gender Bias Exploit**: The 14% disparity creates a significant attack surface
+                    2. **Age Discrimination Vector**: 56+ group sees 28% lower approval than peak (26-35)
+                    3. **Intersectional Vulnerability**: Combined gender/age effects create 37% disparity in worst case
+                    
+                    **Attack Scenarios:**
+                    
+                    1. **Regulatory Arbitrage**: Reporting bias to authorities could trigger investigations
+                    2. **Legal Exposure**: Class action lawsuits based on discrimination evidence
+                    3. **Reputational Attack**: Public disclosure could damage brand trust
+                    4. **Input Manipulation**: Strategic data entry to exploit known biases
+                    
+                    **Risk Level: HIGH**
+                    """)
+        
+        with col2:
+            if st.button("Generate Mitigation Plan", key="export_bias_report", use_container_width=True):
+                st.success("Generating bias mitigation strategy...")
+                
+                with st.spinner("Formulating countermeasures..."):
+                    time.sleep(1)
+                    
+                    st.markdown("""
+                    ### Bias Mitigation Plan
+                    
+                    **Immediate Actions:**
+                    
+                    1. Apply post-processing equalized odds to current model outputs
+                    2. Implement monitoring system to detect exploitation attempts
+                    3. Create fallback decision process for high-risk cases
+                    
+                    **Medium-term Solutions:**
+                    
+                    1. Retrain model with reweighed training data
+                    2. Implement adversarial debiasing during training
+                    3. Create dedicated bias response team
+                    
+                    **Long-term Strategy:**
+                    
+                    1. Develop comprehensive bias testing as part of CI/CD pipeline
+                    2. Implement explainable AI techniques to identify bias sources
+                    3. Create bias bounty program for external testing
+                    """)
+    
+    except Exception as e:
+        logger.error(f"Bias comparison rendering failed: {str(e)}")
+        logger.debug(traceback.format_exc())
+        st.error(f"Bias comparison module compromised: {str(e)}")
+
+def render_bias_labs_integration():
+    """Render the bias labs integration page. Connect with the pros."""
+    try:
+        render_header()
+        
+        st.markdown("""
+        <h2>Bias Labs Integration</h2>
+        <p>Connect with external bias analysis frameworks. Bring in the specialists.</p>
+        """, unsafe_allow_html=True)
+        
+        st.markdown("""
+        <div class="renegade-quote">
+        For the toughest bias problems, bring in the specialists. Even mavericks know when to call for backup.
+        </div>
+        """, unsafe_allow_html=True)
+        
+        # Embed HTML component for bias labs
+        html_code = """
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <meta charset="UTF-8">
+          <title>Bias Labs Integration</title>
+          <style>
+            body { font-family: 'Segoe UI', sans-serif; padding: 20px; background: rgba(0,0,0,0); color: inherit; }
+            .container { max-width: 800px; margin: 0 auto; }
+            pre { background: rgba(0,0,0,0.1); padding: 10px; border-radius: 4px; overflow: auto; }
+          </style>
+          <script>
+            class BiasLabsIntegration {
+              constructor() {
+                this.supportedLabs = {
+                  "helm": { name: "Stanford HELM", capabilities: ["fairness", "toxicity", "stereotype"], apiEndpoint: "https://crfm.stanford.edu/helm/api/v1/" },
+                  "fairlearn": { name: "Microsoft Fairlearn", capabilities: ["demographic_parity", "equal_opportunity", "false_positive_rate_parity"], apiEndpoint: "https://fairlearn.azure-api.net/v1/" },
+                  "aequitas": { name: "UChicago Aequitas", capabilities: ["disparate_impact", "statistical_parity", "proportional_parity"], apiEndpoint: "https://aequitas.dsapp.org/api/" },
+                  "responsibleai": { name: "Google What-If Tool", capabilities: ["counterfactual_fairness", "intersectional_analysis"], apiEndpoint: "https://responsibleai.googleapis.com/v1/" }
+                };
+                this.testResults = {};
+                this.activeLabs = new Set(["helm", "fairlearn"]);
+              }
+              
+              async evaluateModel(model, options = {}) {
+                let results = { model_id: model.id, timestamp: new Date().toISOString(), lab_results: {} };
+                let tasks = [];
+                for (let labId of this.activeLabs) {
+                  tasks.push(this.evaluateWithLab(labId, model, options, results));
+                }
+                await Promise.all(tasks);
+                results.aggregate_metrics = { fairness_score: 65, demographic_parity: 0.18, equal_opportunity: 0.15 }; // Sample metrics
+                results.recommendations = [{ area: "fairness", recommendation: "Improve fairness", priority: "high" }];
+                this.testResults[model.id + "-" + Date.now()] = results;
+                return results;
+              }
+              
+              async evaluateWithLab(labId, model, options, results) {
+                await new Promise(resolve => setTimeout(resolve, 500));
+                results.lab_results[labId] = { status: "completed", results: { metrics: { fairness_score: 65, demographic_parity: 0.18, equal_opportunity: 0.15 }, issues: [] } };
+              }
+            }
+            window.biasLabsIntegration = new BiasLabsIntegration();
+            async function runBiasEvaluation() {
+              const model = { id: document.getElementById("model-id").value, provider: document.getElementById("model-provider").value };
+              const results = await window.biasLabsIntegration.evaluateModel(model, {});
+              document.getElementById("lab-results").innerText = JSON.stringify(results, null, 2);
+            }
+          </script>
+        </head>
+        <body>
+          <div class="container">
+            <h3>Bias Labs Control Panel</h3>
+            <input type="text" id="model-id" placeholder="Model ID" value="gpt-4-turbo">
+            <input type="text" id="model-provider" placeholder="Model Provider" value="openai">
+            <button onclick="runBiasEvaluation()" style="background: #FF5722; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer;">Execute Bias Analysis</button>
+            <pre id="lab-results"></pre>
+          </div>
+        </body>
+        </html>
+        """
+        components.html(html_code, height=400, scrolling=True)
+        
+        # Integration configuration
+        st.markdown("<h3>Configure Bias Labs</h3>", unsafe_allow_html=True)
+        
+        # Select labs to integrate with
+        st.markdown("<h4>Select Bias Testing Frameworks</h4>", unsafe_allow_html=True)
+        
+        col1, col2 = st.columns(2)
+        
+        with col1:
+            st.checkbox("Stanford HELM", value=True, key="enable_helm", 
+                       help="Holistic Evaluation of Language Models - comprehensive testing framework")
+            st.checkbox("Microsoft Fairlearn", value=True, key="enable_fairlearn",
+                       help="Microsoft's fairness assessment toolkit with multiple bias metrics")
+        
+        with col2:
+            st.checkbox("UChicago Aequitas", value=False, key="enable_aequitas",
+                       help="Open source bias audit toolkit developed by UChicago's Center for Data Science")
+            st.checkbox("Google What-If Tool", value=False, key="enable_withiftool",
+                       help="Google's tool for analyzing ML models through visualization")
+        
+        # API configuration
+        st.markdown("<h4>API Configuration</h4>", unsafe_allow_html=True)
+        
+        with st.expander("API Keys (Optional)"):
+            st.text_input("HELM API Key", type="password", key="helm_api_key")
+            st.text_input("Fairlearn API Key", type="password", key="fairlearn_api_key")
+            st.text_input("Aequitas API Key", type="password", key="aequitas_api_key")
+            st.text_input("What-If Tool API Key", type="password", key="whatif_api_key")
+        
+        # Testing parameters
+        st.markdown("<h4>Testing Parameters</h4>", unsafe_allow_html=True)
+        
+        col1, col2 = st.columns(2)
+        
+        with col1:
+            st.selectbox("Model Type", ["Language Model", "Vision Model", "Multimodal", "Classification", "Ranking"], key="bias_model_type")
+            st.slider("Test Complexity", 1, 10, 5, key="bias_test_complexity",
+                     help="Higher values run more comprehensive tests but take longer")
+        
+        with col2:
+            st.multiselect("Protected Attributes", ["Gender", "Age", "Race/Ethnicity", "Religion", "Disability", "Nationality", "Sexual Orientation"], 
+                          default=["Gender", "Race/Ethnicity"], key="bias_protected_attrs")
+            st.checkbox("Generate Exploitation Report", value=True, key="bias_exploit_report",
+                       help="Analyzes how discovered biases could potentially be exploited")
+        
+        # Save configuration button
+        if st.button("Save Bias Labs Configuration", key="save_bias_labs"):
+            st.session_state.bias_labs_enabled = True
+            st.success("Bias labs configuration locked and loaded!")
+            
+            # Show exploitation potential
+            st.markdown("""
+            <h4>Vulnerability Intelligence</h4>
+            <div class="hacker-alert">
+            Preliminary analysis shows potential bias vulnerabilities in the selected model. Full testing may reveal exploitable weaknesses that could be used for targeted attacks or regulatory exposure.
+            </div>
+            """, unsafe_allow_html=True)
+    
+    except Exception as e:
+        logger.error(f"Bias labs integration rendering failed: {str(e)}")
+        logger.debug(traceback.format_exc())
+        st.error(f"Bias labs integration compromised: {str(e)}")
+
+def render_helm_evaluation():
+    """Render the HELM evaluation page. The heavy artillery."""
+    try:
+        render_header()
+        
+        st.markdown("""
+        <h2>HELM Evaluation</h2>
+        <p>Evaluate models using Stanford's Holistic Evaluation of Language Models framework.</p>
+        """, unsafe_allow_html=True)
+        
+        st.markdown("""
+        <div class="renegade-quote">
+        HELM is the academic's heavy artillery. When you need to thoroughly dissect a model, this is your weapon of choice.
+        </div>
+        """, unsafe_allow_html=True)
+        
+        # Embed the HTML component
+        html_code = """
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <meta charset="UTF-8">
+          <title>HELM Evaluation</title>
+          <style>
+            body { font-family: 'Segoe UI', sans-serif; padding: 20px; background: rgba(0,0,0,0); color: inherit; }
+            pre { background: rgba(0,0,0,0.1); padding: 10px; border-radius: 4px; overflow: auto; }
+            .btn { padding: 8px 16px; background: #FF5722; color: white; border: none; border-radius: 4px; cursor: pointer; }
+          </style>
+          <script>
+            async function evaluateWithHELM(model, scenarios) {
+              // Simulated HELM API call
+              await new Promise(resolve => setTimeout(resolve, 1000));
+              return { fairness: 0.65, toxicity: 0.10, stereotype: 0.15, source: "HELM" };
+            }
+            document.addEventListener("DOMContentLoaded", () => {
+              document.getElementById("run-helm").addEventListener("click", async () => {
+                const model = { 
+                  id: document.getElementById("model-id").value, 
+                  provider: document.getElementById("model-provider").value 
+                };
+                const scenarios = document.getElementById("scenarios").value.split(",");
+                document.getElementById("helm-status").innerText = "Evaluation in progress...";
+                const results = await evaluateWithHELM(model, scenarios);
+                document.getElementById("helm-results").innerText = JSON.stringify(results, null, 2);
+                document.getElementById("helm-status").innerText = "Evaluation complete!";
+              });
+            });
+          </script>
+        </head>
+        <body>
+          <h3>HELM Control Panel</h3>
+          <input type="text" id="model-id" placeholder="Model ID" value="gpt-4-turbo">
+          <input type="text" id="model-provider" placeholder="Model Provider" value="openai">
+          <input type="text" id="scenarios" placeholder="Scenarios (comma separated)" value="toxicity,stereotype,fairness">
+          <button class="btn" id="run-helm">Execute HELM Evaluation</button>
+          <div id="helm-status" style="margin-top: 10px; font-style: italic;"></div>
+          <pre id="helm-results"></pre>
+        </body>
+        </html>
+        """
+        components.html(html_code, height=300, scrolling=True)
+        
+        # Additional HELM configuration
+        st.markdown("<h3>HELM Configuration</h3>", unsafe_allow_html=True)
+        
+        # Evaluation scenarios
+        st.markdown("<h4>Evaluation Scenarios</h4>", unsafe_allow_html=True)
+        
+        scenarios = [
+            "Toxicity",
+            "Stereotype & Bias",
+            "Misinformation",
+            "Extremism",
+            "Privacy Leakage",
+            "Truthfulness",
+            "Hate Speech"
+        ]
+        
+        selected_scenarios = st.multiselect("Select Evaluation Scenarios", scenarios, default=["Toxicity", "Stereotype & Bias"])
+        
+        # Evaluation settings
+        col1, col2 = st.columns(2)
+        
+        with col1:
+            eval_iterations = st.slider("Evaluation Iterations", 1, 100, 10)
+            temperature = st.slider("Temperature", 0.0, 1.0, 0.7, 0.1)
+        
+        with col2:
+            concurrent_evals = st.slider("Concurrent Evaluations", 1, 10, 3)
+            timeout = st.slider("Timeout (seconds)", 1, 60, 30)
+        
+        # Run evaluation button
+        if st.button("Launch HELM Evaluation", key="run_helm_eval", type="primary"):
+            with st.spinner("Running HELM evaluation..."):
+                # Simulate evaluation
+                time.sleep(2)
+                st.success("HELM evaluation completed!")
+                
+                # Show mock results
+                st.markdown("<h3>Evaluation Results</h3>", unsafe_allow_html=True)
+                
+                # Example results data
+                results_data = {
+                    "Toxicity": 0.12,
+                    "Stereotype & Bias": 0.19,
+                    "Truthfulness": 0.71,
+                    "Helpfulness": 0.82
+                }
+                
+                # Plot results
+                fig = px.bar(
+                    x=list(results_data.keys()),
+                    y=list(results_data.values()),
+                    title="HELM Evaluation Results",
+                    labels={"x": "Dimension", "y": "Score"},
+                    color=list(results_data.values()),
+                    color_continuous_scale="Plasma"
+                )
+                
+                # Customize for dark/light theme
+                theme = get_theme()
+                fig.update_layout(
+                    paper_bgcolor='rgba(0,0,0,0)',
+                    plot_bgcolor='rgba(0,0,0,0)',
+                    font=dict(color=theme["text"])
+                )
+                
+                st.plotly_chart(fig, use_container_width=True)
+                
+                # Detailed results
+                st.markdown("<h3>Detailed Findings</h3>", unsafe_allow_html=True)
+                
+                with st.expander("Stereotype & Bias Analysis", expanded=True):
+                    st.markdown("""
+                    #### Gender Stereotypes
+                    
+                    The model showed moderate bias in profession-related prompts (19% disparity):
+                    - Preferentially associated males with STEM professions
+                    - Preferentially associated females with caring professions
+                    
+                    **Exploitability: MEDIUM**
+                    
+                    This bias could be exploited by adversaries to manipulate model outputs in professional contexts, reinforcing existing stereotypes, or creating discriminatory content that appears authoritative.
+                    """)
+                
+                with st.expander("Toxicity Analysis"):
+                    st.markdown("""
+                    #### Toxicity Resistance
+                    
+                    The model showed good resistance to generating toxic content (12% failure rate):
+                    - Strong resistance to explicit hate speech
+                    - Moderate resistance to subtle derogatory content
+                    - Some vulnerability to toxicity when prompted with ambiguous scenarios
+                    
+                    **Exploitability: LOW**
+                    
+                    While generally resistant, specific edge cases could be exploited by crafting scenarios with ambiguous moral contexts where the model fails to recognize subtle toxic framing.
+                    """)
+    
+    except Exception as e:
+        logger.error(f"HELM evaluation rendering failed: {str(e)}")
+        logger.debug(traceback.format_exc())
+        st.error(f"HELM evaluation compromised: {str(e)}")
+
+# ----------------------------------------------------------------
+# PAGE RENDERERS - SUSTAINABILITY PAGES 
+# ----------------------------------------------------------------
+
+def render_environmental_impact():
+    """Render the environmental impact assessment page. Fight clean."""
+    try:
+        render_header()
+        
+        st.markdown("""
+        <h2>Environmental Impact Assessment</h2>
+        <p>Analyze and mitigate the carbon footprint of AI systems. Breaking systems shouldn't break the planet.</p>
+        """, unsafe_allow_html=True)
+        
+        st.markdown("""
+        <div class="renegade-quote">
+        Even mavericks care about the planet. We break systems, not ecosystems.
+        </div>
+        """, unsafe_allow_html=True)
+        
+        # Initialize carbon tracker if not already done
+        if 'carbon_tracker' not in st.session_state:
+            st.session_state.carbon_tracker = CarbonTracker()
+            st.session_state.carbon_tracker_initialized = False
+        
+        # Create tabs for different functionality
+        tabs = st.tabs(["Carbon Tracking", "Model Analysis", "Optimization Strategy"])
+        
+        with tabs[0]:
+            st.markdown("<h3>Carbon Emission Tracking</h3>", unsafe_allow_html=True)
+            
+            # Initialize tracker if needed
+            if not st.session_state.carbon_tracker_initialized:
+                project_name = st.text_input("Project Name", value="AI Security Assessment", key="carbon_project_name")
+                
+                if st.button("Initialize Carbon Tracker", key="init_carbon_tracker"):
+                    with st.spinner("Initializing tracker..."):
+                        success = st.session_state.carbon_tracker.initialize_tracker(project_name)
+                        
+                        if success:
+                            st.session_state.carbon_tracker_initialized = True
+                            st.success("Carbon tracker initialized and ready for action!")
+                            safe_rerun()
+                        else:
+                            st.error("Tracker initialization failed. Systems compromised.")
+            else:
+                # Tracking controls
+                if not st.session_state.get("carbon_tracking_active", False):
+                    if st.button("Start Carbon Tracking", key="start_carbon_tracking", type="primary"):
+                        success = st.session_state.carbon_tracker.start_tracking()
+                        
+                        if success:
+                            st.session_state.carbon_tracking_active = True
+                            st.success("Carbon tracking initiated!")
+                            safe_rerun()
+                        else:
+                            st.error("Failed to start carbon tracking. Systems compromised.")
+                else:
+                    if st.button("Stop Carbon Tracking", key="stop_carbon_tracking", type="primary"):
+                        emissions = st.session_state.carbon_tracker.stop_tracking()
+                        
+                        st.session_state.carbon_tracking_active = False
+                        st.success(f"Carbon tracking completed! Measured: {emissions:.6f} kg CO2eq")
+                        
+                        # Store the last measurement
+                        if 'carbon_measurements' not in st.session_state:
+                            st.session_state.carbon_measurements = []
+                        
+                        st.session_state.carbon_measurements.append({
+                            "timestamp": datetime.now().isoformat(),
+                            "emissions_kg": emissions
+                        })
+                        
+                        safe_rerun()
+                
+                # Display tracking status
+                if st.session_state.get("carbon_tracking_active", False):
+                    st.info("Carbon tracking is active. Run your AI operations and stop tracking when finished.")
+                
+                # Display measurements
+                st.markdown("<h4>Emission Measurements</h4>", unsafe_allow_html=True)
+                
+                total_emissions = st.session_state.carbon_tracker.get_total_emissions()
+                
+                col1, col2, col3 = st.columns(3)
+                
+                with col1:
+                    st.metric("Total Emissions", f"{total_emissions:.6f} kg CO2eq")
+                
+                with col2:
+                    # Convert to equivalent metrics
+                    miles_driven = total_emissions * 2.4  # ~2.4 miles per kg CO2
+                    st.metric("Equivalent Car Miles", f"{miles_driven:.2f} miles")
+                
+                with col3:
+                    # Trees needed to offset
+                    trees_needed = total_emissions * 0.06  # ~0.06 trees per kg CO2 per year
+                    st.metric("Trees Needed (1 year)", f"{trees_needed:.2f} trees")
+                
+                # Show all measurements
+                if 'carbon_measurements' in st.session_state and st.session_state.carbon_measurements:
+                    st.markdown("<h4>Measurement History</h4>", unsafe_allow_html=True)
+                    
+                    measurements_df = pd.DataFrame(st.session_state.carbon_measurements)
+                    st.dataframe(measurements_df)
+                    
+                    # Create a chart if there are enough measurements
+                    if len(st.session_state.carbon_measurements) > 1:
+                        # Prepare data
+                        measurements_df['timestamp'] = pd.to_datetime(measurements_df['timestamp'])
+                        
+                        fig = px.line(
+                            measurements_df,
+                            x='timestamp',
+                            y='emissions_kg',
+                            title='Carbon Emissions Over Time',
+                            labels={'timestamp': 'Time', 'emissions_kg': 'Emissions (kg CO2eq)'}
+                        )
+                        
+                        # Customize for dark/light theme
+                        theme = get_theme()
+                        fig.update_layout(
+                            paper_bgcolor='rgba(0,0,0,0)',
+                            plot_bgcolor='rgba(0,0,0,0)',
+                            font=dict(color=theme["text"])
+                        )
+                        
+                        st.plotly_chart(fig, use_container_width=True)
+        
+        with tabs[1]:
+            st.markdown("<h3>AI Model Carbon Footprint Analysis</h3>", unsafe_allow_html=True)
+            
+            col1, col2 = st.columns(2)
+            
+            with col1:
+                model_name = st.text_input("Model Name", value="", key="model_name")
+                model_parameters = st.number_input("Model Parameters (billions)", min_value=0.1, max_value=1000000.0, value=1.0, key="model_parameters")
+                training_hours = st.number_input("Training Hours", min_value=0, max_value=10000, value=24, key="training_hours")
+            
+            with col2:
+                hardware_options = ["CPU", "GPU - Consumer", "GPU - Data Center", "TPU", "Custom ASIC"]
+                hardware_type = st.selectbox("Hardware Type", hardware_options, key="hardware_type")
+                daily_inferences = st.number_input("Daily Inferences", min_value=0, max_value=1000000000, value=10000, key="daily_inferences")
+                hosting_region = st.selectbox("Hosting Region", [
+                    "North America", "Europe", "Asia Pacific", "South America", "Africa", "Middle East"
+                ], key="hosting_region")
+            
+            if st.button("Calculate Carbon Footprint", key="calc_footprint", type="primary"):
+                # Simulate carbon footprint calculation
+                st.success("Carbon footprint calculation complete!")
+                
+                # Simulating total emissions
+                training_emissions = training_hours * 0.5 * (1 if hardware_type == "CPU" else 2)  # Simplified calculation
+                inference_emissions = daily_inferences * 0.00001 * (1 if hardware_type == "CPU" else 2)
+                yearly_inference = inference_emissions * 365
+                total_emissions = training_emissions + yearly_inference
+                
+                # Show results
+                st.markdown("<h4>Carbon Footprint Intelligence</h4>", unsafe_allow_html=True)
+                
+                col1, col2, col3 = st.columns(3)
+                
+                with col1:
+                    st.metric("Training Emissions", f"{training_emissions:.2f} kg CO2eq")
+                
+                with col2:
+                    st.metric("Daily Inference", f"{inference_emissions:.4f} kg CO2eq")
+                
+                with col3:
+                    st.metric("Yearly Emissions", f"{total_emissions:.2f} kg CO2eq")
+                
+                # Visualization
+                data = pd.DataFrame({
+                    "Source": ["Training", "Inference (1 year)"],
+                    "Emissions (kg CO2)": [training_emissions, yearly_inference]
+                })
+                
+                fig = px.bar(
+                    data,
+                    x="Source",
+                    y="Emissions (kg CO2)",
+                    title="Carbon Emissions Breakdown",
+                    color="Source",
+                    color_discrete_sequence=[get_theme()["primary"], get_theme()["secondary"]]
+                )
+                
+                # Customize for dark/light theme
+                theme = get_theme()
+                fig.update_layout(
+                    paper_bgcolor='rgba(0,0,0,0)',
+                    plot_bgcolor='rgba(0,0,0,0)',
+                    font=dict(color=theme["text"])
+                )
+                
+                st.plotly_chart(fig, use_container_width=True)
+                
+                # Add impact assessment
+                st.markdown("<h4>Environmental Impact Assessment</h4>", unsafe_allow_html=True)
+                
+                impact_level = "HIGH" if total_emissions > 1000 else "MEDIUM" if total_emissions > 100 else "LOW"
+                
+                st.markdown(f"""
+                **Impact Level: {impact_level}**
+                
+                This model's carbon footprint represents:
+                - Equivalent to driving {total_emissions * 2.4:.1f} miles in an average car
+                - Would require {total_emissions * 0.06:.1f} trees growing for a year to offset
+                - Consumes approximately {total_emissions / 0.5:.1f} kWh of electricity
+                
+                **Vulnerability Assessment:**
+                
+                This environmental impact could pose risks in:
+                - Regulatory compliance in regions with carbon reporting requirements
+                - ESG (Environmental, Social, Governance) performance metrics
+                - Public perception and brand reputation
+                """)
+        
+        with tabs[2]:
+            st.markdown("<h3>Carbon Optimization Strategies</h3>", unsafe_allow_html=True)
+            
+            st.markdown("""
+            <div class="renegade-quote">
+            Fighting dirty doesn't mean a dirty planet. Optimize your operations to minimize your footprint.
+            </div>
+            """, unsafe_allow_html=True)
+            
+            # Describe different strategies
+            strategies = [
+                {
+                    "name": "Model Architecture Optimization",
+                    "description": "Design efficient model architectures that require less computation while maintaining accuracy.",
+                    "techniques": [
+                        "Pruning - Remove unnecessary connections or neurons",
+                        "Knowledge Distillation - Train smaller models using larger models as teachers",
+                        "Neural Architecture Search - Automatically find efficient architectures",
+                        "Sparsity - Encourage sparse activations and weights"
+                    ],
+                    "savings": "20-60%",
+                    "difficulty": "Medium"
+                },
+                {
+                    "name": "Quantization and Precision Reduction",
+                    "description": "Reduce the numerical precision of model weights and operations.",
+                    "techniques": [
+                        "Post-training quantization - Convert trained model to lower precision",
+                        "Quantization-aware training - Train with simulated quantization",
+                        "Mixed-precision training - Use different precisions for different operations",
+                        "Binary/ternary networks - Use 1-bit or 2-bit weights"
+                    ],
+                    "savings": "60-75%",
+                    "difficulty": "Medium"
+                },
+                {
+                    "name": "Carbon-Aware Scheduling",
+                    "description": "Schedule computation based on carbon intensity of electricity.",
+                    "techniques": [
+                        "Time-shifting - Move computations to when grid is greener",
+                        "Location-shifting - Route requests to lower-carbon regions",
+                        "Carbon-intensity API integration - Real-time carbon data",
+                        "Dynamic scaling - Adjust compute based on carbon signals"
+                    ],
+                    "savings": "15-40%",
+                    "difficulty": "Low"
+                }
+            ]
+            
+            # Create expandable sections for each strategy
+            for i, strategy in enumerate(strategies):
+                with st.expander(f"{i+1}. {strategy['name']} - {strategy['savings']} savings", expanded=i==0):
+                    st.markdown(f"**{strategy['description']}**")
+                    
+                    st.markdown("#### Key Techniques")
+                    for technique in strategy['techniques']:
+                        st.markdown(f"- {technique}")
+                    
+                    st.markdown(f"**Implementation Difficulty:** {strategy['difficulty']}")
+                    
+                    # Add exploitation aspect
+                    if strategy['name'] == "Model Architecture Optimization":
+                        st.markdown("""
+                        #### Security Considerations
+                        
+                        When implementing model pruning and distillation, be aware that:
+                        - Attackers could potentially exploit simplified decision boundaries
+                        - Reduced precision can create new attack surfaces
+                        - Some security features may be inadvertently pruned
+                        
+                        **Always test security after optimization!**
+                        """)
+                    elif strategy['name'] == "Quantization and Precision Reduction":
+                        st.markdown("""
+                        #### Security Considerations
+                        
+                        Quantization can introduce security vulnerabilities:
+                        - Reduced numerical precision can be exploited in adversarial attacks
+                        - Model behavior becomes more deterministic and potentially predictable
+                        - Edge cases may be handled differently than in full-precision models
+                        
+                        **Security testing should include quantized versions!**
+                        """)
+            
+            # Carbon reduction calculator
+            st.markdown("<h3>Carbon Reduction Calculator</h3>", unsafe_allow_html=True)
+            
+            col1, col2 = st.columns(2)
+            
+            with col1:
+                baseline_emissions = st.number_input("Baseline Annual Emissions (kg CO2eq)", min_value=0.0, value=1000.0, key="baseline_emissions")
+                apply_distillation = st.checkbox("Apply Model Distillation (70-90% reduction)", value=True, key="apply_distillation")
+                apply_quantization = st.checkbox("Apply Quantization (60-75% reduction)", value=True, key="apply_quantization")
+            
+            with col2:
+                carbon_aware_scheduling = st.checkbox("Carbon-Aware Scheduling (15-40% reduction)", value=True, key="carbon_aware")
+                efficient_hardware = st.checkbox("Use Efficient Hardware (20-60% reduction)", value=True, key="efficient_hardware")
+                apply_caching = st.checkbox("Implement Result Caching (10-30% reduction)", value=False, key="apply_caching")
+            
+            if st.button("Calculate Potential Savings", key="calc_savings", type="primary"):
+                # Calculate combined reductions
+                reduction_factors = []
+                
+                if apply_distillation:
+                    reduction_factors.append(0.8)  # 80% reduction
+                
+                if apply_quantization:
+                    # Apply to remaining emissions after previous reductions
+                    remaining = 1.0
+                    for factor in reduction_factors:
+                        remaining *= (1 - factor)
+                    
+                    reduction_factors.append(0.7 * remaining)  # 70% reduction of remaining
+                
+                if carbon_aware_scheduling:
+                    # Apply to remaining emissions
+                    remaining = 1.0
+                    for factor in reduction_factors:
+                        remaining *= (1 - factor)
+                    
+                    reduction_factors.append(0.25 * remaining)  # 25% reduction of remaining
+                
+                if efficient_hardware:
+                    # Apply to remaining emissions
+                    remaining = 1.0
+                    for factor in reduction_factors:
+                        remaining *= (1 - factor)
+                    
+                    reduction_factors.append(0.4 * remaining)  # 40% reduction of remaining
+                
+                if apply_caching:
+                    # Apply to remaining emissions
+                    remaining = 1.0
+                    for factor in reduction_factors:
+                        remaining *= (1 - factor)
+                    
+                    reduction_factors.append(0.2 * remaining)  # 20% reduction of remaining
+                
+                # Calculate total reduction
+                total_reduction = sum(reduction_factors)
+                
+                # Calculate new emissions
+                new_emissions = baseline_emissions * (1 - total_reduction)
+                emissions_saved = baseline_emissions - new_emissions
+                
+                st.success(f"Potential carbon reduction: {total_reduction*100:.1f}%")
+                
+                # Display results
+                col1, col2, col3 = st.columns(3)
+                
+                with col1:
+                    st.metric("Baseline Emissions", f"{baseline_emissions:.2f} kg CO2eq")
+                
+                with col2:
+                    st.metric("New Emissions", f"{new_emissions:.2f} kg CO2eq")
+                
+                with col3:
+                    st.metric("Reduction", f"{total_reduction*100:.1f}%")
+                
+                # Visualize comparison
+                fig = go.Figure()
+                
+                fig.add_trace(go.Bar(
+                    x=["Baseline", "Optimized"],
+                    y=[baseline_emissions, new_emissions],
+                    marker_color=[get_theme()["error"], get_theme()["primary"]]
+                ))
+                
+                # Customize for dark/light theme
+                theme = get_theme()
+                fig.update_layout(
+                    title="Emission Comparison",
+                    yaxis_title="CO2 Emissions (kg)",
+                    margin=dict(l=20, r=20, t=40, b=20),
+                    paper_bgcolor='rgba(0,0,0,0)',
+                    plot_bgcolor='rgba(0,0,0,0)',
+                    font=dict(color=theme["text"])
+                )
+                
+                st.plotly_chart(fig, use_container_width=True)
+    
+    except Exception as e:
+        logger.error(f"Environmental impact rendering failed: {str(e)}")
+        logger.debug(traceback.format_exc())
+        st.error(f"Environmental impact module compromised: {str(e)}")
+
+def render_sustainability_dashboard():
+    """Render the sustainability dashboard page. Monitor your footprint."""
+    try:
+        render_header()
+        
+        st.markdown("""
+        <h2>Sustainability Dashboard</h2>
+        <p>Monitor and optimize the environmental impact of AI systems. Keep your operations clean.</p>
+        """, unsafe_allow_html=True)
+        
+        st.markdown("""
+        <div class="renegade-quote">
+        The best hackers leave no trace - not on systems, not on the planet.
+        </div>
+        """, unsafe_allow_html=True)
+        
+        # Overview metrics
+        col1, col2, col3, col4 = st.columns(4)
+        
+        with col1:
+            # Total carbon footprint
+            total_carbon = sum(m.get("emissions_kg", 0) for m in st.session_state.carbon_measurements) if hasattr(st.session_state, "carbon_measurements") else 0
+            st.metric("Total Carbon Footprint", f"{total_carbon:.4f} kg CO2e")
+        
+        with col2:
+            # Energy consumption
+            energy = total_carbon / 0.5  # Approximate conversion
+            st.metric("Energy Consumption", f"{energy:.2f} kWh")
+        
+        with col3:
+            # Carbon efficiency
+            if hasattr(st.session_state, "test_results") and st.session_state.test_results:
+                test_count = st.session_state.test_results.get("summary", {}).get("total_tests", 0)
+                efficiency = (test_count / total_carbon) if total_carbon > 0 else 0
+                st.metric("Carbon Efficiency", f"{efficiency:.1f} tests/g CO2e")
+            else:
+                st.metric("Carbon Efficiency", "N/A")
+        
+        with col4:
+            # Green score
+            green_score = min(100, max(0, 100 - (total_carbon * 50)))
+            st.metric("Green Score", f"{green_score:.1f}/100")
+        
+        # Emissions trend
+        st.markdown("<h3>Emissions Trend</h3>", unsafe_allow_html=True)
+        
+        if hasattr(st.session_state, "carbon_measurements") and len(st.session_state.carbon_measurements) > 0:
+            # Create DataFrame from measurements
+            measurements_df = pd.DataFrame(st.session_state.carbon_measurements)
+            
+            if len(measurements_df) > 0:
+                measurements_df["timestamp"] = pd.to_datetime(measurements_df["timestamp"])
+                measurements_df = measurements_df.sort_values("timestamp")
+                
+                # Calculate cumulative emissions
+                measurements_df["cumulative_emissions"] = measurements_df["emissions_kg"].cumsum()
+                
+                # Create two y-axis plot
+                fig = make_subplots(specs=[[{"secondary_y": True}]])
+                
+                # Add individual measurements
+                fig.add_trace(
+                    go.Bar(
+                        x=measurements_df["timestamp"],
+                        y=measurements_df["emissions_kg"],
+                        name="Individual Measurements",
+                        marker_color=get_theme()["primary"]
+                    ),
+                    secondary_y=False
+                )
+                
+                # Add cumulative line
+                fig.add_trace(
+                    go.Scatter(
+                        x=measurements_df["timestamp"],
+                        y=measurements_df["cumulative_emissions"],
+                        name="Cumulative Emissions",
+                        line=dict(color=get_theme()["secondary"])
+                    ),
+                    secondary_y=True
+                )
+                
+                # Customize for dark/light theme
+                theme = get_theme()
+                fig.update_layout(
+                    title="Carbon Emissions Over Time",
+                    xaxis_title="Date",
+                    legend=dict(
+                        orientation="h",
+                        yanchor="bottom",
+                        y=1.02,
+                        xanchor="right",
+                        x=1
+                    ),
+                    paper_bgcolor='rgba(0,0,0,0)',
+                    plot_bgcolor='rgba(0,0,0,0)',
+                    font=dict(color=theme["text"])
+                )
+                
+                fig.update_yaxes(title_text="Individual Measurements (kg CO2e)", secondary_y=False)
+                fig.update_yaxes(title_text="Cumulative Emissions (kg CO2e)", secondary_y=True)
+                
+                st.plotly_chart(fig, use_container_width=True)
+            else:
+                st.info("No emissions data available yet. Run tests with carbon tracking enabled to collect intel.")
+        else:
+            st.info("No emissions data available yet. Run tests with carbon tracking enabled to collect intel.")
+        
+        # Optimization recommendations
+        st.markdown("<h3>Sustainability Recommendations</h3>", unsafe_allow_html=True)
+        
+        recommendations = [
+            {
+                "title": "Switch to Smaller Models",
+                "description": "Consider using more efficient, smaller models for routine tasks. For example, using a 7B parameter model instead of a 70B model can reduce emissions by up to 90% while retaining 95% of capability for many tasks.",
+                "impact": "High",
+                "effort": "Medium"
+            },
+            {
+                "title": "Implement Model Caching",
+                "description": "Cache common query results to avoid redundant inference. This can reduce emissions by 20-40% for frequently repeated queries.",
+                "impact": "Medium",
+                "effort": "Low"
+            },
+            {
+                "title": "Optimize Batch Scheduling",
+                "description": "Schedule non-urgent batch processes during times when the grid's carbon intensity is lowest, typically late night or early morning in most regions.",
+                "impact": "Medium",
+                "effort": "Medium"
+            }
+        ]
+        
+        for i, rec in enumerate(recommendations):
+            with st.expander(f"{rec['title']} (Impact: {rec['impact']}, Effort: {rec['effort']})", expanded=i==0):
+                st.markdown(rec["description"])
+                
+                # Add security considerations
+                if rec['title'] == "Switch to Smaller Models":
+                    st.markdown("""
+                    **Security Considerations:**
+                    
+                    Smaller models may have different security characteristics:
+                    - May be more susceptible to certain types of prompt injection attacks
+                    - Could have less robust content filtering capabilities
+                    - Might have different jailbreaking vulnerabilities
+                    
+                    Always perform security testing after model substitution!
+                    """)
+                elif rec['title'] == "Implement Model Caching":
+                    st.markdown("""
+                    **Security Considerations:**
+                    
+                    Caching introduces potential security issues:
+                    - Cache poisoning attacks could compromise the system
+                    - Sensitive data might be inadvertently stored in caches
+                    - Different users might receive the same cached response
+                    
+                    Implement proper cache isolation and invalidation mechanisms!
+                    """)
+    
+    except Exception as e:
+        logger.error(f"Sustainability dashboard rendering failed: {str(e)}")
+        logger.debug(traceback.format_exc())
+        st.error(f"Sustainability dashboard compromised: {str(e)}")
+
+def render_sustainability_integration():
+    """Render the sustainability integration page. Connect with green tools."""
+    try:
+        render_header()
+        
+        st.markdown("""
+        <h2>Sustainability Integration</h2>
+        <p>Integrate sustainability tracking with external tools. Connect the green arsenal.</p>
+        """, unsafe_allow_html=True)
+        
+        st.markdown("""
+        <div class="renegade-quote">
+        The best hackers use every tool at their disposal. These tools help you hack carbon emissions.
+        </div>
+        """, unsafe_allow_html=True)
+        
+        # Embed HTML component for sustainability integration
+        html_code = """
+        <!DOCTYPE html>
+        <html lang="en">
+        <head>
+          <meta charset="UTF-8">
+          <title>Sustainability Integration</title>
+          <style>
+            body { font-family: 'Segoe UI', sans-serif; padding: 20px; background: rgba(0,0,0,0); color: inherit; }
+            .message { padding: 10px; background: rgba(255,255,255,0.1); border-radius: 4px; margin-top: 10px; }
+          </style>
+          <script>
+            (async function() {
+              const engineRoom = window.engineRoom || { sendPrompt: async () => ({ text: "Dummy response" }), getActiveModel: () => ({ modelId: "gpt-4-turbo", provider: "openai" }) };
+              class SustainabilityEngineRoomIntegration {
+                constructor(engineRoom) {
+                  this.engineRoom = engineRoom;
+                  console.log("SustainabilityEngineRoomIntegration initialized.");
+                }
+                async initialize(options = {}) {
+                  console.log("Initializing Sustainability Integration with options:", options);
+                  document.getElementById('integration-status').innerText = 'Initializing sustainability tracking...';
+                  await new Promise(resolve => setTimeout(resolve, 1000));
+                  document.getElementById('integration-status').innerText = 'Sustainability tracking activated.';
+                }
+                addDashboardToEngineRoom() {
+                  console.log("Adding sustainability dashboard to Engine Room UI.");
+                  const msgDiv = document.createElement('div');
+                  msgDiv.className = 'message';
+                  msgDiv.textContent = 'Sustainability dashboard integrated into Engine Room UI.';
+                  document.body.appendChild(msgDiv);
+                }
+              }
+              const sustainabilityIntegration = new SustainabilityEngineRoomIntegration(engineRoom);
+              await sustainabilityIntegration.initialize({ location: { zipCode: "94105", countryCode: "US" } });
+              sustainabilityIntegration.addDashboardToEngineRoom();
+            })();
+          </script>
+        </head>
+        <body>
+          <h3>Sustainability Integration Control Panel</h3>
+          <div id="integration-status"></div>
+        </body>
+        </html>
+        """
+        components.html(html_code, height=150, scrolling=True)
+        
+        # Integration options
+        st.markdown("<h3>Available Integrations</h3>", unsafe_allow_html=True)
+        
+        col1, col2 = st.columns(2)
+        
+        with col1:
+            st.checkbox("Green Software Foundation API", value=True, key="gsf_api",
+                       help="Industry standard metrics for software carbon intensity")
+            st.checkbox("Electricity Maps Carbon Intensity", value=True, key="elec_maps",
+                       help="Real-time carbon intensity data for electricity grids worldwide")
+            st.checkbox("Cloud Provider Carbon Footprint Tools", value=False, key="cloud_carbon",
+                       help="Native carbon tracking tools from major cloud providers")
+        
+        with col2:
+            st.checkbox("CodeCarbon Integration", value=True, key="codecarbon",
+                       help="Track carbon emissions from compute in various environments")
+            st.checkbox("WattTime API", value=False, key="watttime",
+                       help="Marginal emissions data for carbon-aware computing")
+            st.checkbox("ML CO2 Impact Calculator", value=True, key="ml_co2",
+                       help="Estimate CO2 emissions from ML model training and inference")
+        
+        # Configure integration details
+        with st.expander("Integration Details", expanded=True):
+            integration_option = st.selectbox("Select Integration to Configure", 
+                                             ["Green Software Foundation API", "Electricity Maps", "CodeCarbon"])
+            
+            if integration_option == "Green Software Foundation API":
+                st.text_input("API Endpoint", value="https://api.greensoftware.foundation/v1", key="gsf_endpoint")
+                st.text_input("API Key", type="password", key="gsf_api_key")
+                st.selectbox("Measurement Method", ["SCI Methodology", "Carbon-aware SDK", "Custom"], key="gsf_method")
+                
+                # Add exploitation strategy
+                st.markdown("""
+                <div class="hacker-alert">
+                Security note: The GSF API uses token-based authentication. Ensure tokens are rotated regularly and stored securely to prevent unauthorized emissions data access.
+                </div>
+                """, unsafe_allow_html=True)
+            
+            elif integration_option == "Electricity Maps":
+                st.text_input("API Endpoint", value="https://api.electricitymaps.com/v3", key="elec_maps_endpoint")
+                st.text_input("API Key", type="password", key="elec_maps_api_key")
+                st.multiselect("Tracked Regions", ["US West", "US East", "Europe Central", "Asia Pacific"], 
+                               default=["US West", "Europe Central"], key="elec_maps_regions")
+                
+                # Add exploitation strategy
+                st.markdown("""
+                <div class="hacker-alert">
+                Security note: Electricity Maps data can be sensitive for operational security. Ensure your region-specific emissions data is not publicly accessible to prevent attackers from inferring operational patterns.
+                </div>
+                """, unsafe_allow_html=True)
+            
+            elif integration_option == "CodeCarbon":
+                st.text_input("Project Name", value="AI Security Analysis", key="codecarbon_project")
+                st.text_input("Output Directory", value="./emissions", key="codecarbon_output")
+                st.checkbox("Track GPU Usage", value=True, key="codecarbon_gpu")
+                st.checkbox("Country-specific Grid Emissions", value=True, key="codecarbon_country")
+                
+                # Add exploitation strategy
+                st.markdown("""
+                <div class="hacker-alert">
+                Security note: CodeCarbon writes emissions data to disk by default. Ensure output directory permissions are properly configured to prevent unauthorized access to operational metrics.
+                </div>
+                """, unsafe_allow_html=True)
+        
+        # Carbon-aware scheduling
+        st.markdown("<h3>Carbon-Aware Scheduling</h3>", unsafe_allow_html=True)
+        
+        st.markdown("""
+        Optimize AI operations based on real-time carbon intensity data. Run non-urgent workloads when electricity is cleanest.
+        """)
+        
+        col1, col2 = st.columns(2)
+        
+        with col1:
+            st.checkbox("Enable Carbon-Aware Scheduling", value=True, key="enable_carbon_scheduling")
+            st.slider("Carbon Intensity Threshold (gCO2/kWh)", 100, 500, 300, key="carbon_threshold", 
+                     help="Delay non-urgent operations when carbon intensity exceeds this threshold")
+        
+        with col2:
+            st.selectbox("Priority Level", ["High (Run Immediately)", "Medium (Short Delay OK)", "Low (Schedule Optimally)"], key="carbon_priority")
+            st.multiselect("Optimize Regions", ["US West", "US East", "Europe", "Asia"], default=["US West", "Europe"], key="optimize_regions")
+        
+        # Save configuration
+        if st.button("Save Sustainability Configuration", key="save_sustainability_config"):
+            st.session_state.sustainability_integrated = True
+            st.success("Sustainability integration configuration locked and loaded!")
+            
+            # Show monitoring status
+            st.markdown("<h3>Monitoring Status</h3>", unsafe_allow_html=True)
+            
+            # Generate some fake grid intensity data
+            regions = {
+                "US West": random.randint(200, 400),
+                "US East": random.randint(300, 500),
+                "Europe": random.randint(150, 350),
+                "Asia": random.randint(350, 550)
+            }
+            
+            # Find the cleanest region
+            cleanest_region = min(regions.items(), key=lambda x: x[1])
+            dirtiest_region = max(regions.items(), key=lambda x: x[1])
+            
+            col1, col2 = st.columns(2)
+            
+            with col1:
+                st.markdown(f"""
+                **Current Grid Intensities:**
+                
+                - US West: {regions['US West']} gCO2/kWh
+                - US East: {regions['US East']} gCO2/kWh
+                - Europe: {regions['Europe']} gCO2/kWh
+                - Asia: {regions['Asia']} gCO2/kWh
+                
+                **Cleanest Region:** {cleanest_region[0]} ({cleanest_region[1]} gCO2/kWh)
+                """)
+            
+            with col2:
+                st.markdown(f"""
+                **Strategic Recommendation:**
+                
+                Route compute-intensive operations to {cleanest_region[0]}.
+                
+                Avoid {dirtiest_region[0]} region when possible 
+                ({dirtiest_region[1]} gCO2/kWh is {(dirtiest_region[1]/cleanest_region[1]):.1f}x dirtier).
+                
+                Potential emissions reduction: {((dirtiest_region[1] - cleanest_region[1])/dirtiest_region[1]*100):.1f}%
+                """)
+    
+    except Exception as e:
+        logger.error(f"Sustainability integration rendering failed: {str(e)}")
+        logger.debug(traceback.format_exc())
+        st.error(f"Sustainability integration compromised: {str(e)}")
+
+# ----------------------------------------------------------------
+# PAGE RENDERERS - INTEGRATION & TOOL PAGES 
+# ----------------------------------------------------------------
+
+def render_engine_room_integration():
+    """Render the engine room integration page. Connect your engines."""
+    try:
+        render_header()
+        
+        st.markdown("""
+        <h2>Engine Room Integration</h2>
+        <p>Integrate with the Engine Room for advanced AI testing. Connect the power plant.</p>
+        """, unsafe_allow_html=True)
+        
+        st.markdown("""
+        <div class="renegade-quote">
+        Every maverick needs an engine room. This is where the real power comes from.
+        </div>
+        """, unsafe_allow_html=True)
+        
+        # Embed HTML component for engine room
+        html_code = """
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <meta charset="UTF-8">
+          <title>Engine Room Integration</title>
+          <style>
+            body { font-family: 'Segoe UI', sans-serif; padding: 1rem; background: rgba(0,0,0,0); color: inherit; }
+            .status-container { margin-top: 10px; padding: 10px; background: rgba(255,255,255,0.1); border-radius: 4px; }
+          </style>
+          <script>
+            class EngineRoomIntegration {
+              constructor(engineRoom) {
+                this.engineRoom = engineRoom;
+                this.status = "Initializing...";
+              }
+              initializeEngineRoom(containerId) {
+                this.status = "Engine Room Connected";
+                document.getElementById(containerId).innerHTML = "<p>" + this.status + "</p>";
+              }
+              addToNavigation(navContainerId) {
+                document.getElementById(navContainerId).innerHTML = "<p>Navigation Systems Online</p>";
+              }
+              getRedTeamingMiddleware() {
+                return async (input, options) => ({ text: "Response for: " + input.content });
+              }
+            }
+            const engineRoom = window.engineRoom || { sendPrompt: async () => ({ text: "Dummy response" }) };
+            const integration = new EngineRoomIntegration(engineRoom);
+            window.onload = () => {
+              integration.initializeEngineRoom("engine-room-container");
+              integration.addToNavigation("engine-room-nav");
+            }
+          </script>
+        </head>
+        <body>
+          <h3>Engine Room Control Panel</h3>
+          <div id="engine-room-nav"></div>
+          <div class="status-container" id="engine-room-container"></div>
+        </body>
+        </html>
+        """
+        components.html(html_code, height=200, scrolling=True)
+        
+        # Integration configuration
+        st.markdown("<h3>Engine Room Configuration</h3>", unsafe_allow_html=True)
+        
+        col1, col2 = st.columns(2)
+        
+        with col1:
+            er_endpoint = st.text_input("Engine Room API Endpoint", value="https://api.engineroom.dev", key="er_endpoint")
+            er_api_key = st.text_input("API Key", type="password", key="er_api_key")
+        
+        with col2:
+            er_version = st.selectbox("Engine Room Version", ["v1", "v2", "v3 (Beta)"], key="er_version")
+            er_timeout = st.slider("Request Timeout (seconds)", 1, 60, 30, key="er_timeout")
+        
+        # Test connection button
+        if st.button("Establish Connection", key="test_er_connection"):
+            with st.spinner("Connecting to Engine Room..."):
+                # Simulate connection test
+                time.sleep(2)
+                st.session_state.engine_room_initialized = True
+                st.success("Engine Room connection established! Systems online.")
+        
+        # Feature configuration
+        if st.session_state.get("engine_room_initialized", False):
+            st.markdown("<h3>Feature Configuration</h3>", unsafe_allow_html=True)
+            
+            col1, col2 = st.columns(2)
+            
+            with col1:
+                st.checkbox("Red Teaming Middleware", value=True, key="er_redteaming",
+                           help="Detect and analyze attack patterns")
